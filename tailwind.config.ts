@@ -52,6 +52,14 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				vote: {
+					primary: 'hsl(var(--vote-primary))',
+					secondary: 'hsl(var(--vote-secondary))'
+				},
+				winner: {
+					gold: 'hsl(var(--winner-gold))',
+					'gold-light': 'hsl(var(--winner-gold-light))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -67,6 +75,15 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			backgroundImage: {
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-vote': 'var(--gradient-vote)',
+				'gradient-winner': 'var(--gradient-winner)'
+			},
+			boxShadow: {
+				'vote': 'var(--shadow-vote)',
+				'winner': 'var(--shadow-winner)'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -84,11 +101,31 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'vote-pulse': {
+					'0%, 100%': { 
+						transform: 'scale(1)',
+						boxShadow: 'var(--shadow-vote)'
+					},
+					'50%': { 
+						transform: 'scale(1.05)',
+						boxShadow: '0 15px 40px -15px hsl(var(--vote-primary) / 0.4)'
+					}
+				},
+				'winner-glow': {
+					'0%, 100%': { 
+						boxShadow: 'var(--shadow-winner)'
+					},
+					'50%': { 
+						boxShadow: '0 15px 50px -10px hsl(var(--winner-gold) / 0.6)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'vote-pulse': 'vote-pulse 2s ease-in-out infinite',
+				'winner-glow': 'winner-glow 3s ease-in-out infinite'
 			}
 		}
 	},
