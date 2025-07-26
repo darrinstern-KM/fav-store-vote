@@ -14,6 +14,8 @@ interface Store {
   votes: number;
   rating: number;
   testimonials: string[];
+  category: string;
+  approved: boolean;
 }
 
 interface StoreSearchProps {
@@ -44,7 +46,9 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore }: StoreSearchProps) 
           zipCode: searchTerm,
           votes: 245,
           rating: 4.2,
-          testimonials: []
+          testimonials: [],
+          category: 'Retail',
+          approved: true
         },
         {
           id: '2',
@@ -55,7 +59,9 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore }: StoreSearchProps) 
           zipCode: searchTerm,
           votes: 187,
           rating: 4.1,
-          testimonials: []
+          testimonials: [],
+          category: 'Electronics',
+          approved: true
         }
       ];
       

@@ -1,12 +1,18 @@
-import { useState } from 'react';
-import { SearchIcon, Trophy, Star, MapPin, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { SearchIcon, Trophy, Star, MapPin, Clock, User, LogOut, Phone, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StoreSearch } from './StoreSearch';
 import { VoteModal } from './VoteModal';
 import { AddStoreModal } from './AddStoreModal';
+import { AuthModal } from './AuthModal';
+import { SMSVotingGuide } from './SMSVotingGuide';
+import { AdminPanel } from './AdminPanel';
+import { useToast } from '@/hooks/use-toast';
 
 interface Store {
   id: string;
@@ -18,6 +24,14 @@ interface Store {
   votes: number;
   rating: number;
   testimonials: string[];
+  category: string;
+  approved: boolean;
+}
+
+interface User {
+  email: string;
+  zipCode: string;
+  isAdmin?: boolean;
 }
 
 const VoteApp = () => {
@@ -25,9 +39,14 @@ const VoteApp = () => {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [showVoteModal, setShowVoteModal] = useState(false);
   const [showAddStoreModal, setShowAddStoreModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [selectedState, setSelectedState] = useState('all');
+  const [activeTab, setActiveTab] = useState('national');
+  const { toast } = useToast();
 
   // Mock data for demonstration
-  const topStores: Store[] = [
+  const allStores: Store[] = [
     {
       id: '1',
       name: 'Downtown Electronics',
@@ -37,7 +56,9 @@ const VoteApp = () => {
       zipCode: '62701',
       votes: 1247,
       rating: 4.8,
-      testimonials: ['Amazing service!', 'Best prices in town']
+      testimonials: ['Amazing service!', 'Best prices in town'],
+      category: 'Electronics',
+      approved: true
     },
     {
       id: '2',
@@ -48,7 +69,9 @@ const VoteApp = () => {
       zipCode: '62702',
       votes: 1156,
       rating: 4.7,
-      testimonials: ['Great selection', 'Friendly staff']
+      testimonials: ['Great selection', 'Friendly staff'],
+      category: 'Clothing',
+      approved: true
     },
     {
       id: '3',
@@ -59,20 +82,106 @@ const VoteApp = () => {
       zipCode: '62703',
       votes: 1089,
       rating: 4.9,
-      testimonials: ['Always helpful', 'Quick service']
+      testimonials: ['Always helpful', 'Quick service'],
+      category: 'Health & Wellness',
+      approved: true
+    },
+    {
+      id: '4',
+      name: 'Texas BBQ House',
+      address: '321 Lone Star Rd',
+      city: 'Austin',
+      state: 'TX',
+      zipCode: '73301',
+      votes: 892,
+      rating: 4.6,
+      testimonials: ['Best BBQ in town!'],
+      category: 'Food & Beverage',
+      approved: true
+    },
+    {
+      id: '5',
+      name: 'California Surf Shop',
+      address: '789 Beach Blvd',
+      city: 'Los Angeles',
+      state: 'CA',
+      zipCode: '90210',
+      votes: 756,
+      rating: 4.8,
+      testimonials: ['Great gear and service'],
+      category: 'Sports & Recreation',
+      approved: true
     }
   ];
+
+  const states = ['IL', 'TX', 'CA', 'NY', 'FL'];
+  
+  const getTopStores = () => {
+    if (activeTab === 'state' && selectedState !== 'all') {
+      return allStores.filter(store => store.state === selectedState).slice(0, 10);
+    }
+    return allStores.slice(0, 10);
+  };
 
   const contestEndDate = new Date('2024-08-15');
   const timeLeft = Math.max(0, Math.ceil((contestEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
   const handleVote = (store: Store) => {
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
     setSelectedStore(store);
     setShowVoteModal(true);
   };
 
+  const handleAuthSuccess = (userData: User) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    toast({
+      title: "Logged out successfully",
+    });
+  };
+
+  // Show admin panel if user is admin
+  if (user?.isAdmin) {
+    return <AdminPanel />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-background border-b px-4 py-4">
+        <div className="container mx-auto max-w-6xl flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Trophy className="h-8 w-8 text-vote-primary" />
+            <h1 className="text-xl font-bold">Store Vote Contest</h1>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  <span className="text-sm">{user.email}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  <LogOut className="h-4 w-4 mr-1" />
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button onClick={() => setShowAuthModal(true)}>
+                Login to Vote
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="bg-gradient-hero py-16 px-4 text-center text-white">
         <div className="container mx-auto max-w-4xl">
@@ -92,7 +201,7 @@ const VoteApp = () => {
           <div className="mx-auto max-w-2xl">
             <StoreSearch 
               onStoreSelect={(store) => handleVote(store)}
-              onAddNewStore={() => setShowAddStoreModal(true)}
+              onAddNewStore={() => user ? setShowAddStoreModal(true) : setShowAuthModal(true)}
             />
           </div>
         </div>
@@ -108,8 +217,31 @@ const VoteApp = () => {
             </p>
           </div>
 
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+              <TabsTrigger value="national">Top 10 National</TabsTrigger>
+              <TabsTrigger value="state">Winners by State</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="state" className="mt-6">
+              <div className="flex justify-center mb-6">
+                <Select value={selectedState} onValueChange={setSelectedState}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Select a state" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All States</SelectItem>
+                    {states.map(state => (
+                      <SelectItem key={state} value={state}>{state}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </TabsContent>
+          </Tabs>
+
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {topStores.map((store, index) => (
+            {getTopStores().map((store, index) => (
               <Card 
                 key={store.id} 
                 className={`group cursor-pointer transition-all duration-300 hover:shadow-vote ${
@@ -132,6 +264,9 @@ const VoteApp = () => {
                         <MapPin className="h-4 w-4" />
                         {store.city}, {store.state}
                       </div>
+                      <Badge variant={index === 0 ? "secondary" : "outline"} className={`text-xs mt-1 ${index === 0 ? 'bg-white/20 text-white' : ''}`}>
+                        {store.category}
+                      </Badge>
                     </div>
                     <div className="text-right">
                       <div className={`text-2xl font-bold ${index === 0 ? 'text-white' : 'text-vote-primary'}`}>
@@ -177,6 +312,9 @@ const VoteApp = () => {
         </div>
       </section>
 
+      {/* SMS Voting Guide */}
+      <SMSVotingGuide />
+
       {/* How it Works */}
       <section className="bg-secondary py-16 px-4">
         <div className="container mx-auto max-w-4xl text-center">
@@ -218,11 +356,19 @@ const VoteApp = () => {
         store={selectedStore}
         isOpen={showVoteModal}
         onClose={() => setShowVoteModal(false)}
+        user={user}
       />
       
       <AddStoreModal
         isOpen={showAddStoreModal}
         onClose={() => setShowAddStoreModal(false)}
+        user={user}
+      />
+
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={handleAuthSuccess}
       />
     </div>
   );

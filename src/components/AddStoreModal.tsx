@@ -4,14 +4,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+
+interface User {
+  email: string;
+  zipCode: string;
+  isAdmin?: boolean;
+}
 
 interface AddStoreModalProps {
   isOpen: boolean;
   onClose: () => void;
+  user: User | null;
 }
 
-export const AddStoreModal = ({ isOpen, onClose }: AddStoreModalProps) => {
+export const AddStoreModal = ({ isOpen, onClose, user }: AddStoreModalProps) => {
   const [storeName, setStoreName] = useState('');
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
@@ -21,10 +29,23 @@ export const AddStoreModal = ({ isOpen, onClose }: AddStoreModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const storeCategories = [
+    'Electronics',
+    'Clothing',
+    'Food & Beverage', 
+    'Health & Wellness',
+    'Sports & Recreation',
+    'Home & Garden',
+    'Automotive',
+    'Books & Media',
+    'Retail',
+    'Other'
+  ];
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!storeName || !address || !city || !state || !zipCode) {
+    if (!storeName || !address || !city || !state || !zipCode || !category) {
       toast({
         title: "Please fill in all required fields",
         variant: "destructive"
@@ -34,11 +55,11 @@ export const AddStoreModal = ({ isOpen, onClose }: AddStoreModalProps) => {
 
     setIsSubmitting(true);
 
-    // Simulate API call to add store
+    // Simulate API call to add store - stores need admin approval
     setTimeout(() => {
       toast({
-        title: "Store added successfully!",
-        description: `${storeName} has been added to our database and you can now vote for it.`,
+        title: "Store submitted for approval!",
+        description: "Your store will be reviewed by our team and added to the voting list once approved.",
       });
       
       // Reset form
@@ -67,7 +88,7 @@ export const AddStoreModal = ({ isOpen, onClose }: AddStoreModalProps) => {
           <div className="bg-secondary p-4 rounded-lg">
             <p className="text-sm text-muted-foreground">
               Don't see your favorite store? Add it to our database so others can vote for it too! 
-              All submissions are reviewed before being added.
+              All submissions require admin approval before being listed.
             </p>
           </div>
 
@@ -89,14 +110,20 @@ export const AddStoreModal = ({ isOpen, onClose }: AddStoreModalProps) => {
             {/* Category */}
             <div className="space-y-2">
               <Label htmlFor="category" className="text-base font-semibold">
-                Store Category (optional)
+                Store Category *
               </Label>
-              <Input
-                id="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Electronics, Clothing, Grocery, etc."
-              />
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {storeCategories.map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Address */}
@@ -185,7 +212,7 @@ export const AddStoreModal = ({ isOpen, onClose }: AddStoreModalProps) => {
                 disabled={isSubmitting}
                 className="flex-1 bg-gradient-vote hover:shadow-vote"
               >
-                {isSubmitting ? 'Adding Store...' : 'Add Store'}
+                {isSubmitting ? 'Submitting for Approval...' : 'Submit for Approval'}
               </Button>
             </div>
           </form>

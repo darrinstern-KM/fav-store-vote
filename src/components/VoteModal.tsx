@@ -17,15 +17,24 @@ interface Store {
   votes: number;
   rating: number;
   testimonials: string[];
+  category: string;
+  approved: boolean;
+}
+
+interface User {
+  email: string;
+  zipCode: string;
+  isAdmin?: boolean;
 }
 
 interface VoteModalProps {
   store: Store | null;
   isOpen: boolean;
   onClose: () => void;
+  user: User | null;
 }
 
-export const VoteModal = ({ store, isOpen, onClose }: VoteModalProps) => {
+export const VoteModal = ({ store, isOpen, onClose, user }: VoteModalProps) => {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [email, setEmail] = useState('');
