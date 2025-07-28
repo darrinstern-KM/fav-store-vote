@@ -13,6 +13,7 @@ import { AuthModal } from './AuthModal';
 import { SMSVotingGuide } from './SMSVotingGuide';
 import { AdminPanel } from './AdminPanel';
 import { ShareButton } from './ShareButton';
+import { StorePromotion } from './StorePromotion';
 import { useToast } from '@/hooks/use-toast';
 
 interface Store {
@@ -329,6 +330,9 @@ const VoteApp = () => {
           </div>
         </div>
       </section>
+
+      {/* Store Promotion Toolkit */}
+      <StorePromotion />
 
       {/* SMS Voting Guide */}
       <SMSVotingGuide />
