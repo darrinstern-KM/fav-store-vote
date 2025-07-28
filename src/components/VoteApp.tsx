@@ -14,6 +14,7 @@ import { SMSVotingGuide } from './SMSVotingGuide';
 import { AdminPanel } from './AdminPanel';
 import { ShareButton } from './ShareButton';
 import { StorePromotion } from './StorePromotion';
+import { StoreDetailsModal } from './StoreDetailsModal';
 import { useToast } from '@/hooks/use-toast';
 
 interface Store {
@@ -42,6 +43,8 @@ const VoteApp = () => {
   const [showVoteModal, setShowVoteModal] = useState(false);
   const [showAddStoreModal, setShowAddStoreModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showStoreDetailsModal, setShowStoreDetailsModal] = useState(false);
+  const [selectedStoreForDetails, setSelectedStoreForDetails] = useState<Store | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [selectedState, setSelectedState] = useState('all');
   const [activeTab, setActiveTab] = useState('national');
@@ -137,6 +140,11 @@ const VoteApp = () => {
     setShowVoteModal(true);
   };
 
+  const handleStoreClick = (store: Store) => {
+    setSelectedStoreForDetails(store);
+    setShowStoreDetailsModal(true);
+  };
+
   const handleAuthSuccess = (userData: User) => {
     setUser(userData);
   };
@@ -212,6 +220,7 @@ const VoteApp = () => {
             <StoreSearch 
               onStoreSelect={(store) => handleVote(store)}
               onAddNewStore={() => user ? setShowAddStoreModal(true) : setShowAuthModal(true)}
+              onStoreClick={handleStoreClick}
             />
           </div>
         </div>
@@ -266,10 +275,16 @@ const VoteApp = () => {
                     </Badge>
                   )}
                   <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className={`text-xl ${index === 0 ? 'text-white' : ''}`}>
-                        {store.name}
-                      </CardTitle>
+                  <div>
+                    <CardTitle 
+                      className={`text-xl cursor-pointer hover:underline ${index === 0 ? 'text-white' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStoreClick(store);
+                      }}
+                    >
+                      {store.name}
+                    </CardTitle>
                       <div className={`flex items-center gap-1 text-sm ${index === 0 ? 'text-white/80' : 'text-muted-foreground'}`}>
                         <MapPin className="h-4 w-4" />
                         {store.city}, {store.state}
@@ -391,6 +406,13 @@ const VoteApp = () => {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onAuthSuccess={handleAuthSuccess}
+      />
+
+      <StoreDetailsModal
+        store={selectedStoreForDetails}
+        isOpen={showStoreDetailsModal}
+        onClose={() => setShowStoreDetailsModal(false)}
+        onVote={handleVote}
       />
     </div>
   );

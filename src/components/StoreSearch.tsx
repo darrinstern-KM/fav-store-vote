@@ -21,9 +21,10 @@ interface Store {
 interface StoreSearchProps {
   onStoreSelect: (store: Store) => void;
   onAddNewStore: () => void;
+  onStoreClick?: (store: Store) => void;
 }
 
-export const StoreSearch = ({ onStoreSelect, onAddNewStore }: StoreSearchProps) => {
+export const StoreSearch = ({ onStoreSelect, onAddNewStore, onStoreClick }: StoreSearchProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<Store[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -104,11 +105,16 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore }: StoreSearchProps) 
         <div className="space-y-3">
           <h3 className="text-lg font-semibold text-white">Found Stores:</h3>
           {searchResults.map((store) => (
-            <Card key={store.id} className="bg-white/90 backdrop-blur-sm hover:bg-white transition-all cursor-pointer" onClick={() => onStoreSelect(store)}>
+            <Card key={store.id} className="bg-white/90 backdrop-blur-sm hover:bg-white transition-all">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-semibold text-lg">{store.name}</h4>
+                  <div className="flex-1">
+                    <h4 
+                      className="font-semibold text-lg cursor-pointer hover:underline"
+                      onClick={() => onStoreClick?.(store)}
+                    >
+                      {store.name}
+                    </h4>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <MapPin className="h-4 w-4" />
                       {store.address}, {store.city}, {store.state} {store.zipCode}
@@ -117,7 +123,10 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore }: StoreSearchProps) 
                       {store.votes} votes
                     </div>
                   </div>
-                  <Button className="bg-gradient-vote">
+                  <Button 
+                    className="bg-gradient-vote"
+                    onClick={() => onStoreSelect(store)}
+                  >
                     Vote
                   </Button>
                 </div>
