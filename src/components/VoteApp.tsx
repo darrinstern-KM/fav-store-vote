@@ -12,6 +12,7 @@ import { AddStoreModal } from './AddStoreModal';
 import { AuthModal } from './AuthModal';
 import { SMSVotingGuide } from './SMSVotingGuide';
 import { AdminPanel } from './AdminPanel';
+import { ShareButton } from './ShareButton';
 import { useToast } from '@/hooks/use-toast';
 
 interface Store {
@@ -191,10 +192,18 @@ const VoteApp = () => {
             Help us discover the best retail stores in your community. Vote now and share your experience!
           </p>
           
-          {/* Contest Timer */}
-          <div className="mx-auto mb-8 inline-flex items-center gap-2 rounded-full bg-white/20 px-6 py-3 backdrop-blur-sm">
-            <Clock className="h-5 w-5" />
-            <span className="font-semibold">Contest ends in {timeLeft} days</span>
+          {/* Contest Timer and Share */}
+          <div className="flex flex-col items-center gap-4 mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-6 py-3 backdrop-blur-sm">
+              <Clock className="h-5 w-5" />
+              <span className="font-semibold">Contest ends in {timeLeft} days</span>
+            </div>
+            <ShareButton 
+              title="Vote for Your Favorite Store - Store Vote Contest"
+              url={window.location.href}
+              description="Help us discover the best retail stores in your community. Join the contest and vote for your favorites!"
+              variant="ghost"
+            />
           </div>
 
           {/* Search Section */}
@@ -296,15 +305,24 @@ const VoteApp = () => {
                       {store.rating}
                     </span>
                   </div>
-                  <Button 
-                    className={`w-full transition-all group-hover:animate-vote-pulse ${
-                      index === 0 
-                        ? 'bg-white text-winner-gold hover:bg-white/90' 
-                        : 'bg-gradient-vote hover:shadow-vote'
-                    }`}
-                  >
-                    Vote Now
-                  </Button>
+                  <div className="space-y-2">
+                    <Button 
+                      className={`w-full transition-all group-hover:animate-vote-pulse ${
+                        index === 0 
+                          ? 'bg-white text-winner-gold hover:bg-white/90' 
+                          : 'bg-gradient-vote hover:shadow-vote'
+                      }`}
+                    >
+                      Vote Now
+                    </Button>
+                    <ShareButton 
+                      title={`Vote for ${store.name} - Store Vote Contest`}
+                      url={`${window.location.origin}?store=${store.id}`}
+                      description={`Help ${store.name} win the Store Vote Contest! They're currently at ${store.votes} votes in ${store.city}, ${store.state}.`}
+                      variant="ghost"
+                      size="sm"
+                    />
+                  </div>
                 </CardContent>
               </Card>
             ))}
