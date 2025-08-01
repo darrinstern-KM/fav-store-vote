@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Check, X, Store, Users, MessageSquare } from 'lucide-react';
+import { Check, X, Store, Users, MessageSquare, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { ExcelImport } from './ExcelImport';
 
 interface PendingStore {
   id: string;
@@ -112,6 +113,10 @@ export const AdminPanel = () => {
             <Store className="h-4 w-4 mr-2" />
             Pending Stores ({pendingStores.length})
           </TabsTrigger>
+          <TabsTrigger value="import">
+            <Upload className="h-4 w-4 mr-2" />
+            Excel Import
+          </TabsTrigger>
           <TabsTrigger value="votes">
             <Users className="h-4 w-4 mr-2" />
             Recent Votes ({recentVotes.length})
@@ -168,6 +173,10 @@ export const AdminPanel = () => {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="import">
+          <ExcelImport />
         </TabsContent>
 
         <TabsContent value="votes" className="space-y-4">
