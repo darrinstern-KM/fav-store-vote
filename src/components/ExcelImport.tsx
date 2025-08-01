@@ -116,24 +116,32 @@ export const ExcelImport = () => {
   const downloadTemplate = () => {
     // Create CSV template with required columns
     const headers = [
+      'shop_id',
       'name',
       'address', 
       'city',
       'state',
       'zip_code',
       'category',
+      'shop_email',
+      'shop_owner',
+      'shop_hours',
       'phone',
       'website',
       'description'
     ];
     
     const sampleData = [
+      'SHOP001',
       'Downtown Electronics',
       '123 Main St',
       'Springfield',
       'IL',
       '62701',
       'Electronics',
+      'contact@downtown-electronics.com',
+      'John Smith',
+      'Mon-Fri 9AM-7PM, Sat 10AM-6PM',
       '555-123-4567',
       'https://downtown-electronics.com',
       'Your local electronics store with the best prices and service'
@@ -184,8 +192,8 @@ export const ExcelImport = () => {
             <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Upload an Excel or CSV file with store data. Required columns: name, address, city, state, zip_code, category. 
-              Optional columns: phone, website, description. Implement with Supabase Edge Functions for full functionality.
+              Upload an Excel or CSV file with store data. Required columns: shop_id, name, address, city, state, zip_code, category. 
+              Optional columns: shop_email, shop_owner, shop_hours, phone, website, description. Implement with Supabase Edge Functions for full functionality.
             </AlertDescription>
           </Alert>
 

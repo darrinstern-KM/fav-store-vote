@@ -1,12 +1,16 @@
 -- Create stores table
 CREATE TABLE stores (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  shop_id TEXT UNIQUE NOT NULL, -- Internal use only
   name VARCHAR(255) NOT NULL,
   address VARCHAR(255) NOT NULL,
   city VARCHAR(100) NOT NULL,
   state VARCHAR(2) NOT NULL,
   zip_code VARCHAR(10) NOT NULL,
   category VARCHAR(100) NOT NULL,
+  shop_email TEXT,
+  shop_owner TEXT,
+  shop_hours TEXT,
   approved BOOLEAN DEFAULT false,
   votes_count INTEGER DEFAULT 0,
   rating DECIMAL(2,1) DEFAULT 0,
@@ -36,6 +40,7 @@ CREATE TABLE votes (
 );
 
 -- Create indexes for better performance
+CREATE INDEX idx_stores_shop_id ON stores(shop_id);
 CREATE INDEX idx_stores_state_city ON stores(state, city);
 CREATE INDEX idx_stores_zip_code ON stores(zip_code);
 CREATE INDEX idx_stores_approved ON stores(approved);
@@ -119,9 +124,9 @@ INSERT INTO users (email, zip_code, is_admin) VALUES
 ('admin@example.com', '12345', true),
 ('user@example.com', '62701', false);
 
-INSERT INTO stores (name, address, city, state, zip_code, category, approved, votes_count, rating) VALUES 
-('Downtown Electronics', '123 Main St', 'Springfield', 'IL', '62701', 'Electronics', true, 1247, 4.8),
-('Fashion Forward', '456 Oak Ave', 'Springfield', 'IL', '62702', 'Clothing', true, 1156, 4.7),
-('Corner Pharmacy', '789 Pine St', 'Springfield', 'IL', '62703', 'Health & Wellness', true, 1089, 4.9),
-('Texas BBQ House', '321 Lone Star Rd', 'Austin', 'TX', '73301', 'Food & Beverage', true, 892, 4.6),
-('California Surf Shop', '789 Beach Blvd', 'Los Angeles', 'CA', '90210', 'Sports & Recreation', true, 756, 4.8);
+INSERT INTO stores (shop_id, name, address, city, state, zip_code, category, shop_email, shop_owner, shop_hours, approved, votes_count, rating) VALUES 
+('SHOP001', 'Downtown Electronics', '123 Main St', 'Springfield', 'IL', '62701', 'Electronics', 'contact@downtown-electronics.com', 'John Smith', 'Mon-Fri 9AM-7PM, Sat 10AM-6PM', true, 1247, 4.8),
+('SHOP002', 'Fashion Forward', '456 Oak Ave', 'Springfield', 'IL', '62702', 'Clothing', 'info@fashionforward.com', 'Sarah Johnson', 'Mon-Sat 10AM-8PM, Sun 12PM-6PM', true, 1156, 4.7),
+('SHOP003', 'Corner Pharmacy', '789 Pine St', 'Springfield', 'IL', '62703', 'Health & Wellness', 'pharmacy@corner.com', 'Mike Davis', 'Mon-Fri 8AM-9PM, Sat-Sun 9AM-7PM', true, 1089, 4.9),
+('SHOP004', 'Texas BBQ House', '321 Lone Star Rd', 'Austin', 'TX', '73301', 'Food & Beverage', 'orders@texasbbq.com', 'Bob Wilson', 'Daily 11AM-10PM', true, 892, 4.6),
+('SHOP005', 'California Surf Shop', '789 Beach Blvd', 'Los Angeles', 'CA', '90210', 'Sports & Recreation', 'surf@calisurf.com', 'Lisa Chen', 'Mon-Sun 9AM-9PM', true, 756, 4.8);
