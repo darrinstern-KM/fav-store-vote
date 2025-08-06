@@ -6,11 +6,15 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface Store {
   id: string;
+  shopId?: string; // Internal use only - not displayed
   name: string;
   address: string;
   city: string;
   state: string;
   zipCode: string;
+  shopEmail?: string; // Display on profile
+  shopOwner?: string; // Internal use only - not displayed
+  shopHours?: string; // Display on profile
   votes: number;
   rating: number;
   testimonials: string[];

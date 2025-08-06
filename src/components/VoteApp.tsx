@@ -19,11 +19,15 @@ import { useToast } from '@/hooks/use-toast';
 
 interface Store {
   id: string;
+  shopId?: string; // Internal use only - not displayed
   name: string;
   address: string;
   city: string;
   state: string;
   zipCode: string;
+  shopEmail?: string; // Display on profile
+  shopOwner?: string; // Internal use only - not displayed
+  shopHours?: string; // Display on profile
   votes: number;
   rating: number;
   testimonials: string[];
@@ -54,11 +58,15 @@ const VoteApp = () => {
   const allStores: Store[] = [
     {
       id: '1',
+      shopId: 'SHOP001',
       name: 'Downtown Electronics',
       address: '123 Main St',
       city: 'Springfield',
       state: 'IL',
       zipCode: '62701',
+      shopEmail: 'contact@downtown-electronics.com',
+      shopOwner: 'John Smith',
+      shopHours: 'Mon-Fri 9AM-7PM, Sat 10AM-6PM',
       votes: 1247,
       rating: 4.8,
       testimonials: ['Amazing service!', 'Best prices in town'],
@@ -67,11 +75,15 @@ const VoteApp = () => {
     },
     {
       id: '2',
+      shopId: 'SHOP002',
       name: 'Fashion Forward',
       address: '456 Oak Ave',
       city: 'Springfield',
       state: 'IL',
       zipCode: '62702',
+      shopEmail: 'info@fashionforward.com',
+      shopOwner: 'Sarah Johnson',
+      shopHours: 'Mon-Sat 10AM-8PM, Sun 12PM-6PM',
       votes: 1156,
       rating: 4.7,
       testimonials: ['Great selection', 'Friendly staff'],
@@ -80,11 +92,15 @@ const VoteApp = () => {
     },
     {
       id: '3',
+      shopId: 'SHOP003',
       name: 'Corner Pharmacy',
       address: '789 Pine St',
       city: 'Springfield',
       state: 'IL',
       zipCode: '62703',
+      shopEmail: 'pharmacy@corner.com',
+      shopOwner: 'Mike Davis',
+      shopHours: 'Mon-Fri 8AM-9PM, Sat-Sun 9AM-7PM',
       votes: 1089,
       rating: 4.9,
       testimonials: ['Always helpful', 'Quick service'],
@@ -93,11 +109,15 @@ const VoteApp = () => {
     },
     {
       id: '4',
+      shopId: 'SHOP004',
       name: 'Texas BBQ House',
       address: '321 Lone Star Rd',
       city: 'Austin',
       state: 'TX',
       zipCode: '73301',
+      shopEmail: 'orders@texasbbq.com',
+      shopOwner: 'Bob Wilson',
+      shopHours: 'Daily 11AM-10PM',
       votes: 892,
       rating: 4.6,
       testimonials: ['Best BBQ in town!'],
@@ -106,11 +126,15 @@ const VoteApp = () => {
     },
     {
       id: '5',
+      shopId: 'SHOP005',
       name: 'California Surf Shop',
       address: '789 Beach Blvd',
       city: 'Los Angeles',
       state: 'CA',
       zipCode: '90210',
+      shopEmail: 'surf@calisurf.com',
+      shopOwner: 'Lisa Chen',
+      shopHours: 'Mon-Sun 9AM-9PM',
       votes: 756,
       rating: 4.8,
       testimonials: ['Great gear and service'],

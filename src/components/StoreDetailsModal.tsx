@@ -1,4 +1,4 @@
-import { MapPin, Star, ExternalLink, Users, MessageSquare, Calendar } from 'lucide-react';
+import { MapPin, Star, ExternalLink, Users, MessageSquare, Calendar, Mail, Clock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,11 +6,15 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface Store {
   id: string;
+  shopId?: string; // Internal use only - not displayed
   name: string;
   address: string;
   city: string;
   state: string;
   zipCode: string;
+  shopEmail?: string; // Display on profile
+  shopOwner?: string; // Internal use only - not displayed
+  shopHours?: string; // Display on profile
   votes: number;
   rating: number;
   testimonials: string[];
@@ -65,22 +69,46 @@ export const StoreDetailsModal = ({ store, isOpen, onClose, onVote }: StoreDetai
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`h-4 w-4 ${
-                            i < Math.floor(store.rating)
-                              ? 'fill-winner-gold text-winner-gold'
-                              : 'text-muted-foreground'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="font-medium">{store.rating}</span>
-                    <span className="text-muted-foreground">rating</span>
-                  </div>
+                   <div className="flex items-center gap-2">
+                     <div className="flex">
+                       {[...Array(5)].map((_, i) => (
+                         <Star
+                           key={i}
+                           className={`h-4 w-4 ${
+                             i < Math.floor(store.rating)
+                               ? 'fill-winner-gold text-winner-gold'
+                               : 'text-muted-foreground'
+                           }`}
+                         />
+                       ))}
+                     </div>
+                     <span className="font-medium">{store.rating}</span>
+                     <span className="text-muted-foreground">rating</span>
+                   </div>
+
+                   {/* Contact Information */}
+                   {store.shopEmail && (
+                     <div className="flex items-center gap-3">
+                       <Mail className="h-4 w-4 text-vote-primary" />
+                       <a 
+                         href={`mailto:${store.shopEmail}`}
+                         className="text-vote-primary hover:underline"
+                       >
+                         {store.shopEmail}
+                       </a>
+                     </div>
+                   )}
+
+                   {/* Store Hours */}
+                   {store.shopHours && (
+                     <div className="flex items-start gap-3">
+                       <Clock className="h-4 w-4 text-vote-primary mt-1 flex-shrink-0" />
+                       <div>
+                         <p className="font-medium">Store Hours</p>
+                         <p className="text-muted-foreground text-sm">{store.shopHours}</p>
+                       </div>
+                     </div>
+                   )}
                 </div>
               </CardContent>
             </Card>
