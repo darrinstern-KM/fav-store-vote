@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      stores: {
+        Row: {
+          approved: boolean | null
+          created_at: string
+          id: string
+          rating: number | null
+          shop_addr_1: string | null
+          shop_addr_1_m: string | null
+          shop_addr_2: string | null
+          shop_addr_2_m: string | null
+          shop_city: string | null
+          shop_city_m: string | null
+          shop_email: string | null
+          shop_hours: string | null
+          shop_id: string
+          shop_mdse: string | null
+          shop_name: string
+          shop_owner: string | null
+          shop_phone_1: string | null
+          shop_phone_2: string | null
+          shop_state: string | null
+          shop_state_m: string | null
+          shop_website: string | null
+          shop_zip: string | null
+          shop_zip_m: string | null
+          updated_at: string
+          votes_count: number | null
+        }
+        Insert: {
+          approved?: boolean | null
+          created_at?: string
+          id?: string
+          rating?: number | null
+          shop_addr_1?: string | null
+          shop_addr_1_m?: string | null
+          shop_addr_2?: string | null
+          shop_addr_2_m?: string | null
+          shop_city?: string | null
+          shop_city_m?: string | null
+          shop_email?: string | null
+          shop_hours?: string | null
+          shop_id: string
+          shop_mdse?: string | null
+          shop_name: string
+          shop_owner?: string | null
+          shop_phone_1?: string | null
+          shop_phone_2?: string | null
+          shop_state?: string | null
+          shop_state_m?: string | null
+          shop_website?: string | null
+          shop_zip?: string | null
+          shop_zip_m?: string | null
+          updated_at?: string
+          votes_count?: number | null
+        }
+        Update: {
+          approved?: boolean | null
+          created_at?: string
+          id?: string
+          rating?: number | null
+          shop_addr_1?: string | null
+          shop_addr_1_m?: string | null
+          shop_addr_2?: string | null
+          shop_addr_2_m?: string | null
+          shop_city?: string | null
+          shop_city_m?: string | null
+          shop_email?: string | null
+          shop_hours?: string | null
+          shop_id?: string
+          shop_mdse?: string | null
+          shop_name?: string
+          shop_owner?: string | null
+          shop_phone_1?: string | null
+          shop_phone_2?: string | null
+          shop_state?: string | null
+          shop_state_m?: string | null
+          shop_website?: string | null
+          shop_zip?: string | null
+          shop_zip_m?: string | null
+          updated_at?: string
+          votes_count?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
