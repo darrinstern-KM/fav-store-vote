@@ -221,9 +221,25 @@ const VoteApp = () => {
         <div className="container mx-auto max-w-4xl">
           <Trophy className="mx-auto mb-6 h-16 w-16 text-winner-gold" />
           <h1 className="mb-4 text-5xl font-bold">Vote for Your Favorite Store</h1>
-          <p className="mb-8 text-xl opacity-90">
+          <p className="mb-6 text-xl opacity-90">
             Help us discover the best retail stores in your community. Vote now and share your experience!
           </p>
+          
+          {/* Sponsor Branding */}
+          <div className="mb-8 bg-white/10 backdrop-blur-sm rounded-lg p-6">
+            <p className="text-sm opacity-80 mb-4">This competition is proudly supported by:</p>
+            <div className="flex flex-wrap items-center justify-center gap-6">
+              <div className="flex items-center gap-2">
+                <img src="/lovable-uploads/3bd255e3-a72d-40f7-8ed5-1247212390a5.png" alt="h+h americas" className="h-12 w-auto" />
+              </div>
+              <div className="flex items-center gap-2">
+                <img src="/lovable-uploads/d80dca82-3afa-455c-a057-33f1f6967df0.png" alt="Fiber+Fabric Craft Festival" className="h-12 w-auto" />
+              </div>
+              <div className="text-white/90 font-semibold text-lg">
+                Koelnmesse Inc.
+              </div>
+            </div>
+          </div>
           
           {/* Contest Timer and Share */}
           <div className="flex flex-col items-center gap-4 mb-8">
