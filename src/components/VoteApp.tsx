@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { SearchIcon, Trophy, Star, MapPin, Clock, User, LogOut, Phone, MessageCircle } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { SearchIcon, Trophy, Star, MapPin, Clock, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,7 @@ import { ShareButton } from './ShareButton';
 import { StorePromotion } from './StorePromotion';
 import { StoreDetailsModal } from './StoreDetailsModal';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Store {
   id: string;
@@ -54,102 +56,46 @@ const VoteApp = () => {
   const [activeTab, setActiveTab] = useState('national');
   const { toast } = useToast();
 
-  // Mock data for demonstration
-  const allStores: Store[] = [
-    {
-      id: '1',
-      shopId: 'SHOP001',
-      name: 'Downtown Electronics',
-      address: '123 Main St',
-      city: 'Springfield',
-      state: 'IL',
-      zipCode: '62701',
-      shopEmail: 'contact@downtown-electronics.com',
-      shopOwner: 'John Smith',
-      shopHours: 'Mon-Fri 9AM-7PM, Sat 10AM-6PM',
-      votes: 1247,
-      rating: 4.8,
-      testimonials: ['Amazing service!', 'Best prices in town'],
-      category: 'Electronics',
-      approved: true
-    },
-    {
-      id: '2',
-      shopId: 'SHOP002',
-      name: 'Fashion Forward',
-      address: '456 Oak Ave',
-      city: 'Springfield',
-      state: 'IL',
-      zipCode: '62702',
-      shopEmail: 'info@fashionforward.com',
-      shopOwner: 'Sarah Johnson',
-      shopHours: 'Mon-Sat 10AM-8PM, Sun 12PM-6PM',
-      votes: 1156,
-      rating: 4.7,
-      testimonials: ['Great selection', 'Friendly staff'],
-      category: 'Clothing',
-      approved: true
-    },
-    {
-      id: '3',
-      shopId: 'SHOP003',
-      name: 'Corner Pharmacy',
-      address: '789 Pine St',
-      city: 'Springfield',
-      state: 'IL',
-      zipCode: '62703',
-      shopEmail: 'pharmacy@corner.com',
-      shopOwner: 'Mike Davis',
-      shopHours: 'Mon-Fri 8AM-9PM, Sat-Sun 9AM-7PM',
-      votes: 1089,
-      rating: 4.9,
-      testimonials: ['Always helpful', 'Quick service'],
-      category: 'Health & Wellness',
-      approved: true
-    },
-    {
-      id: '4',
-      shopId: 'SHOP004',
-      name: 'Texas BBQ House',
-      address: '321 Lone Star Rd',
-      city: 'Austin',
-      state: 'TX',
-      zipCode: '73301',
-      shopEmail: 'orders@texasbbq.com',
-      shopOwner: 'Bob Wilson',
-      shopHours: 'Daily 11AM-10PM',
-      votes: 892,
-      rating: 4.6,
-      testimonials: ['Best BBQ in town!'],
-      category: 'Food & Beverage',
-      approved: true
-    },
-    {
-      id: '5',
-      shopId: 'SHOP005',
-      name: 'California Surf Shop',
-      address: '789 Beach Blvd',
-      city: 'Los Angeles',
-      state: 'CA',
-      zipCode: '90210',
-      shopEmail: 'surf@calisurf.com',
-      shopOwner: 'Lisa Chen',
-      shopHours: 'Mon-Sun 9AM-9PM',
-      votes: 756,
-      rating: 4.8,
-      testimonials: ['Great gear and service'],
-      category: 'Sports & Recreation',
-      approved: true
-    }
-  ];
+  // Load approved stores from Supabase
+  const mapRowToStore = (row: any): Store => ({
+    id: row.id,
+    shopId: row.shop_id ?? undefined,
+    name: row.shop_name ?? 'Unknown Store',
+    address: row.shop_addr_1 ?? row.shop_addr_1_m ?? '',
+    city: row.shop_city ?? row.shop_city_m ?? '',
+    state: row.shop_state ?? row.shop_state_m ?? '',
+    zipCode: row.shop_zip ?? row.shop_zip_m ?? '',
+    shopEmail: row.shop_email ?? undefined,
+    shopOwner: row.shop_owner ?? undefined,
+    shopHours: row.shop_hours ?? undefined,
+    votes: row.votes_count ?? 0,
+    rating: Number(row.rating ?? 0),
+    testimonials: [],
+    category: row.shop_mdse ?? 'Retail',
+    approved: row.approved ?? false,
+  });
 
-  const states = ['IL', 'TX', 'CA', 'NY', 'FL'];
+  const { data: stores = [], isLoading: isStoresLoading } = useQuery({
+    queryKey: ['stores'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('approved', true)
+        .order('votes_count', { ascending: false });
+      if (error) throw error;
+      return (data ?? []).map(mapRowToStore);
+    },
+    staleTime: 60_000,
+  });
+
+  const states = Array.from(new Set(stores.map(s => s.state).filter(Boolean))).sort();
   
   const getTopStores = () => {
-    if (activeTab === 'state' && selectedState !== 'all') {
-      return allStores.filter(store => store.state === selectedState).slice(0, 10);
-    }
-    return allStores.slice(0, 10);
+    const list = activeTab === 'state' && selectedState !== 'all'
+      ? stores.filter(store => store.state === selectedState)
+      : stores;
+    return list.slice(0, 10);
   };
 
   const contestEndDate = new Date('2024-08-15');

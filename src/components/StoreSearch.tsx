@@ -3,6 +3,7 @@ import { Search, Plus, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Store {
   id: string;
@@ -33,48 +34,47 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore, onStoreClick }: Stor
   const [searchResults, setSearchResults] = useState<Store[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Mock search function
   const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
+    const term = searchTerm.trim();
+    if (!term) return;
     
     setIsSearching(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const mockResults: Store[] = [
-        {
-          id: '1',
-          name: 'Target',
-          address: '123 Commerce Blvd',
-          city: 'Springfield',
-          state: 'IL',
-          zipCode: searchTerm,
-          votes: 245,
-          rating: 4.2,
-          testimonials: [],
-          category: 'Retail',
-          approved: true
-        },
-        {
-          id: '2',
-          name: 'Best Buy',
-          address: '456 Electronics Way',
-          city: 'Springfield',
-          state: 'IL',
-          zipCode: searchTerm,
-          votes: 187,
-          rating: 4.1,
-          testimonials: [],
-          category: 'Electronics',
-          approved: true
-        }
-      ];
-      
-      setSearchResults(mockResults);
-      setIsSearching(false);
-    }, 1000);
-  };
+    try {
+      const { data, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('approved', true)
+        .or(`shop_name.ilike.%${term}%,shop_city.ilike.%${term}%,shop_state.ilike.%${term}%,shop_zip.ilike.%${term}%`)
+        .limit(25);
 
+      if (error) throw error;
+
+      const results = (data ?? []).map((row: any): Store => ({
+        id: row.id,
+        shopId: row.shop_id ?? undefined,
+        name: row.shop_name ?? 'Unknown Store',
+        address: row.shop_addr_1 ?? row.shop_addr_1_m ?? '',
+        city: row.shop_city ?? row.shop_city_m ?? '',
+        state: row.shop_state ?? row.shop_state_m ?? '',
+        zipCode: row.shop_zip ?? row.shop_zip_m ?? '',
+        shopEmail: row.shop_email ?? undefined,
+        shopOwner: row.shop_owner ?? undefined,
+        shopHours: row.shop_hours ?? undefined,
+        votes: row.votes_count ?? 0,
+        rating: Number(row.rating ?? 0),
+        testimonials: [],
+        category: row.shop_mdse ?? 'Retail',
+        approved: row.approved ?? false,
+      }));
+
+      setSearchResults(results);
+    } catch (e) {
+      console.error('Search error', e);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
