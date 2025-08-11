@@ -92,7 +92,7 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore, onStoreClick }: Stor
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="pl-10 py-6 text-lg bg-white/90 backdrop-blur-sm border-white/20"
+            className="pl-10 py-6 text-lg text-foreground bg-white/90 backdrop-blur-sm border-white/20"
           />
         </div>
         <Button 
