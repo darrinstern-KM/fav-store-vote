@@ -100,7 +100,7 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore, onStoreClick }: Stor
           disabled={isSearching}
           className="px-8 py-6 bg-white/20 hover:bg-white/30 text-white border border-white/20 backdrop-blur-sm"
         >
-          {isSearching ? 'Searching...' : 'Search'}
+          {isSearching ? 'Searching…' : 'Search'}
         </Button>
       </div>
 

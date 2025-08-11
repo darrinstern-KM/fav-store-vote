@@ -138,7 +138,7 @@ const VoteApp = () => {
         <div className="container mx-auto max-w-6xl flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy className="h-8 w-8 text-vote-primary" />
-            <h1 className="text-xl font-bold">Store Vote Contest</h1>
+            <span className="text-xl font-bold font-playfair">Craft Retail Champions</span>
           </div>
           
           <div className="flex items-center gap-4">
@@ -166,10 +166,9 @@ const VoteApp = () => {
       <section className="bg-gradient-hero py-16 px-4 text-center text-white">
         <div className="container mx-auto max-w-4xl">
           <Trophy className="mx-auto mb-6 h-16 w-16 text-winner-gold" />
-          <h1 className="mb-4 text-5xl font-bold">Vote for Your Favorite Store</h1>
-          <p className="mb-6 text-xl opacity-90">
-            Help us discover the best retail stores in your community. Vote now and share your experience!
-          </p>
+          <h1 className="mb-3 text-5xl font-bold font-playfair">Craft Retail Champions</h1>
+          <p className="mb-2 text-lg opacity-90 font-playfair">Where Creative & Business Meet</p>
+          <p className="mb-6 text-xl opacity-90">Craft Your Passion, Celebrate Creativity! Vote for the shops that power our community.</p>
           
           {/* Sponsor Branding */}
           <div className="mb-8 bg-white/10 backdrop-blur-sm rounded-lg p-6">
@@ -194,9 +193,9 @@ const VoteApp = () => {
               <span className="font-semibold">Contest ends in {timeLeft} days</span>
             </div>
             <ShareButton 
-              title="Vote for Your Favorite Store - Store Vote Contest"
+              title="Craft Retail Champions – Vote Now"
               url={window.location.href}
-              description="Help us discover the best retail stores in your community. Join the contest and vote for your favorites!"
+              description="Celebrate top craft retailers nationwide. Cast your vote in the Craft Retail Champions!"
               variant="ghost"
             />
           </div>
@@ -216,7 +215,7 @@ const VoteApp = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-bold text-foreground">Current Leaders</h2>
+            <h2 className="mb-4 text-4xl font-bold text-foreground font-playfair">Current Leaders</h2>
             <p className="text-xl text-muted-foreground">
               These stores are leading the vote count in their communities
             </p>
@@ -317,13 +316,13 @@ const VoteApp = () => {
                     >
                       Vote Now
                     </Button>
-                    <ShareButton 
-                      title={`Vote for ${store.name} - Store Vote Contest`}
-                      url={`${window.location.origin}?store=${store.id}`}
-                      description={`Help ${store.name} win the Store Vote Contest! They're currently at ${store.votes} votes in ${store.city}, ${store.state}.`}
-                      variant="ghost"
-                      size="sm"
-                    />
+            <ShareButton 
+              title={`Craft Retail Champions – Vote for ${store.name}`}
+              url={`${window.location.origin}?store=${store.id}`}
+              description={`Help ${store.name} climb the Craft Retail Champions leaderboard. They have ${store.votes} votes in ${store.city}, ${store.state}.`}
+              variant="ghost"
+              size="sm"
+            />
                   </div>
                 </CardContent>
               </Card>
@@ -341,7 +340,7 @@ const VoteApp = () => {
       {/* How it Works */}
       <section className="bg-secondary py-16 px-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="mb-12 text-4xl font-bold text-foreground">How It Works</h2>
+          <h2 className="mb-12 text-4xl font-bold text-foreground font-playfair">How It Works</h2>
           <div className="grid gap-8 md:grid-cols-3">
             <div className="space-y-4">
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-vote text-white">

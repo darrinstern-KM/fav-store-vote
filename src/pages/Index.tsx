@@ -3,8 +3,8 @@ import VoteApp from '@/components/VoteApp';
 
 const Index = () => {
   useEffect(() => {
-    document.title = 'Store Voting – Find and Vote Top Local Stores';
-    const desc = 'Vote for your favorite local stores. Discover leaders by state and nationwide.';
+    document.title = 'Craft Retail Champions – Vote for Top Craft Retailers';
+    const desc = 'Celebrate creativity and commerce. Vote for your favorite craft retailers nationwide.';
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
       meta = document.createElement('meta');
