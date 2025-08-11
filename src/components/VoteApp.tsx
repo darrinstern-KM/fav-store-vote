@@ -167,8 +167,8 @@ const VoteApp = () => {
         <div className="container mx-auto max-w-4xl">
           <Trophy className="mx-auto mb-6 h-16 w-16 text-winner-gold" />
           <h1 className="mb-3 text-5xl font-bold font-playfair">Craft Retail Champions</h1>
-          <p className="mb-2 text-lg opacity-90 font-playfair">Where Creative & Business Meet</p>
-          <p className="mb-6 text-xl opacity-90">Craft Your Passion, Celebrate Creativity! Vote for the shops that power our community.</p>
+          <p className="mb-2 text-lg opacity-90 font-playfair">Vote for the Best in Craft Retail!</p>
+          <p className="mb-6 text-xl opacity-90">Craft Your Passion, Celebrate Creativity! Cast your vote for the craft stores that inspire and supply our community. From local gems to online favorites, your vote helps crown the 2025 Craft Retail Champions. Join thousands of crafters, share your favorites, and discover top shops!</p>
           
           {/* Sponsor Branding */}
           <div className="mb-8 bg-white/10 backdrop-blur-sm rounded-lg p-6">
