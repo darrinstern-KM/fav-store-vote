@@ -16,6 +16,7 @@ import { AdminPanel } from './AdminPanel';
 import { ShareButton } from './ShareButton';
 import { StorePromotion } from './StorePromotion';
 import { StoreDetailsModal } from './StoreDetailsModal';
+import { NearbyStores } from './NearbyStores';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -211,7 +212,11 @@ const VoteApp = () => {
         </div>
       </section>
 
-      {/* Current Leaders */}
+      {/* Nearby Stores */}
+      <NearbyStores
+        onStoreSelect={(store) => handleVote(store)}
+        onStoreClick={handleStoreClick}
+      />
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="mb-12 text-center">
