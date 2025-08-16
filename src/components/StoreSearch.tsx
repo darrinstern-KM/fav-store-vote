@@ -40,12 +40,23 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore, onStoreClick }: Stor
     
     setIsSearching(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('stores')
         .select('*')
-        .eq('approved', true)
-        .or(`shop_name.ilike.%${term}%,shop_city.ilike.%${term}%,shop_state.ilike.%${term}%,shop_zip.ilike.%${term}%`)
-        .limit(25);
+        .eq('approved', true);
+
+      // Check if search term is a 5-digit zip code for exact matching
+      const isZipCode = /^\d{5}$/.test(term);
+      
+      if (isZipCode) {
+        // Exact match for ZIP codes
+        query = query.eq('shop_zip', term);
+      } else {
+        // Use text search for other terms
+        query = query.or(`shop_name.ilike.%${term}%,shop_city.ilike.%${term}%,shop_state.ilike.%${term}%,shop_zip.ilike.%${term}%`);
+      }
+
+      const { data, error } = await query.limit(25);
 
       if (error) throw error;
 
@@ -150,8 +161,23 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore, onStoreClick }: Stor
         </div>
       )}
 
+      {/* Empty state messages */}
+      {searchResults.length === 0 && !isSearching && searchTerm && (
+        <div className="text-center text-white/80 space-y-4">
+          <p>No stores found matching "{searchTerm}"</p>
+          <Card className="bg-white/70 backdrop-blur-sm hover:bg-white/80 transition-all cursor-pointer border-dashed border-2 mx-auto max-w-md" onClick={onAddNewStore}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-center gap-3 text-muted-foreground">
+                <Plus className="h-5 w-5" />
+                <span>Add this store to the directory</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* No search yet message */}
-      {searchResults.length === 0 && !isSearching && (
+      {searchResults.length === 0 && !isSearching && !searchTerm && (
         <div className="text-center text-white/80">
           <p>Enter a ZIP code, city, or store name to find stores in your area</p>
         </div>
