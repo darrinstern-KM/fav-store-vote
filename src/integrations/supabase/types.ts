@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           approved: boolean | null
           created_at: string
-          id: string
           rating: number | null
           shop_addr_1: string | null
           shop_addr_1_m: string | null
@@ -28,7 +27,6 @@ export type Database = {
           shop_city_m: string | null
           shop_email: string | null
           shop_hours: string | null
-          shop_id: string
           shop_mdse: string | null
           shop_name: string
           shop_owner: string | null
@@ -39,13 +37,13 @@ export type Database = {
           shop_website: string | null
           shop_zip: string | null
           shop_zip_m: string | null
+          ShopID: string
           updated_at: string
           votes_count: number | null
         }
         Insert: {
           approved?: boolean | null
           created_at?: string
-          id?: string
           rating?: number | null
           shop_addr_1?: string | null
           shop_addr_1_m?: string | null
@@ -55,7 +53,6 @@ export type Database = {
           shop_city_m?: string | null
           shop_email?: string | null
           shop_hours?: string | null
-          shop_id: string
           shop_mdse?: string | null
           shop_name: string
           shop_owner?: string | null
@@ -66,13 +63,13 @@ export type Database = {
           shop_website?: string | null
           shop_zip?: string | null
           shop_zip_m?: string | null
+          ShopID: string
           updated_at?: string
           votes_count?: number | null
         }
         Update: {
           approved?: boolean | null
           created_at?: string
-          id?: string
           rating?: number | null
           shop_addr_1?: string | null
           shop_addr_1_m?: string | null
@@ -82,7 +79,6 @@ export type Database = {
           shop_city_m?: string | null
           shop_email?: string | null
           shop_hours?: string | null
-          shop_id?: string
           shop_mdse?: string | null
           shop_name?: string
           shop_owner?: string | null
@@ -93,6 +89,7 @@ export type Database = {
           shop_website?: string | null
           shop_zip?: string | null
           shop_zip_m?: string | null
+          ShopID?: string
           updated_at?: string
           votes_count?: number | null
         }
