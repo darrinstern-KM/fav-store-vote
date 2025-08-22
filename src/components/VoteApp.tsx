@@ -212,11 +212,40 @@ const VoteApp = () => {
         </div>
       </section>
 
-      {/* Nearby Stores */}
-      <NearbyStores
-        onStoreSelect={(store) => handleVote(store)}
-        onStoreClick={handleStoreClick}
-      />
+      {/* Local Stores Near You */}
+      <section className="py-16 px-4 bg-secondary/50">
+        <div className="container mx-auto max-w-6xl">
+          <div className="mb-8 text-center">
+            <h2 className="mb-4 text-3xl font-bold text-foreground font-playfair">
+              <MapPin className="inline h-8 w-8 mr-2 text-vote-primary" />
+              Local Stores Near You
+            </h2>
+            <p className="text-lg text-muted-foreground mb-6">
+              Support your local craft retailers! Vote for nearby stores or help us grow our directory.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+              <Button 
+                onClick={() => user ? setShowAddStoreModal(true) : setShowAuthModal(true)}
+                variant="outline"
+                className="bg-white/80 hover:bg-white"
+              >
+                <SearchIcon className="h-4 w-4 mr-2" />
+                Add Missing Store
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                Don't see your favorite local store? Help us add it!
+              </p>
+            </div>
+          </div>
+          
+          <NearbyStores
+            onStoreSelect={(store) => handleVote(store)}
+            onStoreClick={handleStoreClick}
+          />
+        </div>
+      </section>
+
+      {/* Current Leaders */}
       <section className="py-16 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="mb-12 text-center">
