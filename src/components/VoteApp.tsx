@@ -57,17 +57,17 @@ const VoteApp = () => {
   const [activeTab, setActiveTab] = useState('national');
   const { toast } = useToast();
 
-  // Load approved stores from Supabase
+  // Load approved stores from Supabase - excluding sensitive business owner info
   const mapRowToStore = (row: any): Store => ({
-    id: row.id,
-    shopId: row.shop_id ?? undefined,
+    id: row.ShopID,
+    shopId: row.ShopID ?? undefined,
     name: row.shop_name ?? 'Unknown Store',
     address: row.shop_addr_1 ?? row.shop_addr_1_m ?? '',
     city: row.shop_city ?? row.shop_city_m ?? '',
     state: row.shop_state ?? row.shop_state_m ?? '',
     zipCode: row.shop_zip ?? row.shop_zip_m ?? '',
-    shopEmail: row.shop_email ?? undefined,
-    shopOwner: row.shop_owner ?? undefined,
+    shopEmail: undefined, // Hidden for security
+    shopOwner: undefined, // Hidden for security
     shopHours: row.shop_hours ?? undefined,
     votes: row.votes_count ?? 0,
     rating: Number(row.rating ?? 0),
@@ -79,9 +79,31 @@ const VoteApp = () => {
   const { data: stores = [], isLoading: isStoresLoading } = useQuery({
     queryKey: ['stores'],
     queryFn: async () => {
+      // Only select non-sensitive fields for public display
       const { data, error } = await supabase
         .from('stores')
-        .select('*')
+        .select(`
+          "ShopID",
+          shop_name,
+          shop_addr_1,
+          shop_addr_2,
+          shop_city,
+          shop_state,
+          shop_zip,
+          shop_addr_1_m,
+          shop_addr_2_m,
+          shop_city_m,
+          shop_state_m,
+          shop_zip_m,
+          shop_hours,
+          shop_mdse,
+          shop_website,
+          votes_count,
+          rating,
+          approved,
+          created_at,
+          updated_at
+        `)
         .eq('approved', true)
         .order('votes_count', { ascending: false });
       if (error) throw error;

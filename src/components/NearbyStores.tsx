@@ -53,9 +53,31 @@ export const NearbyStores = ({ onStoreSelect, onStoreClick }: NearbyStoresProps)
 
   const fetchTopStores = async (zipCode?: string) => {
     try {
+      // Only select non-sensitive fields for public display
       let query = supabase
         .from('stores')
-        .select('*')
+        .select(`
+          "ShopID",
+          shop_name,
+          shop_addr_1,
+          shop_addr_2,
+          shop_city,
+          shop_state,
+          shop_zip,
+          shop_addr_1_m,
+          shop_addr_2_m,
+          shop_city_m,
+          shop_state_m,
+          shop_zip_m,
+          shop_hours,
+          shop_mdse,
+          shop_website,
+          votes_count,
+          rating,
+          approved,
+          created_at,
+          updated_at
+        `)
         .eq('approved', true)
         .order('votes_count', { ascending: false });
 
@@ -68,7 +90,28 @@ export const NearbyStores = ({ onStoreSelect, onStoreClick }: NearbyStoresProps)
           const zipPrefix = zipCode.substring(0, 3);
           const { data: expandedData } = await supabase
             .from('stores')
-            .select('*')
+            .select(`
+              "ShopID",
+              shop_name,
+              shop_addr_1,
+              shop_addr_2,
+              shop_city,
+              shop_state,
+              shop_zip,
+              shop_addr_1_m,
+              shop_addr_2_m,
+              shop_city_m,
+              shop_state_m,
+              shop_zip_m,
+              shop_hours,
+              shop_mdse,
+              shop_website,
+              votes_count,
+              rating,
+              approved,
+              created_at,
+              updated_at
+            `)
             .eq('approved', true)
             .ilike('shop_zip', `${zipPrefix}%`)
             .order('votes_count', { ascending: false })
@@ -141,15 +184,15 @@ export const NearbyStores = ({ onStoreSelect, onStoreClick }: NearbyStoresProps)
 
   const formatStores = (data: any[]): Store[] => {
     return data.map(store => ({
-      id: store.id,
-      shopId: store.shop_id ?? undefined,
+      id: store.ShopID,
+      shopId: store.ShopID ?? undefined,
       name: store.shop_name || 'Unknown Store',
       address: store.shop_addr_1 || store.shop_addr_1_m || '',
       city: store.shop_city || store.shop_city_m || '',
       state: store.shop_state || store.shop_state_m || '',
       zipCode: store.shop_zip || store.shop_zip_m || '',
-      shopEmail: store.shop_email ?? undefined,
-      shopOwner: store.shop_owner ?? undefined,
+      shopEmail: undefined, // Hidden for security
+      shopOwner: undefined, // Hidden for security
       shopHours: store.shop_hours ?? undefined,
       votes: store.votes_count || 0,
       rating: Number(store.rating || 0),

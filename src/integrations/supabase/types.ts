@@ -97,75 +97,7 @@ export type Database = {
       }
     }
     Views: {
-      stores_public: {
-        Row: {
-          approved: boolean | null
-          created_at: string | null
-          rating: number | null
-          shop_addr_1: string | null
-          shop_addr_1_m: string | null
-          shop_addr_2: string | null
-          shop_addr_2_m: string | null
-          shop_city: string | null
-          shop_city_m: string | null
-          shop_hours: string | null
-          shop_mdse: string | null
-          shop_name: string | null
-          shop_state: string | null
-          shop_state_m: string | null
-          shop_website: string | null
-          shop_zip: string | null
-          shop_zip_m: string | null
-          ShopID: string | null
-          updated_at: string | null
-          votes_count: number | null
-        }
-        Insert: {
-          approved?: boolean | null
-          created_at?: string | null
-          rating?: number | null
-          shop_addr_1?: string | null
-          shop_addr_1_m?: string | null
-          shop_addr_2?: string | null
-          shop_addr_2_m?: string | null
-          shop_city?: string | null
-          shop_city_m?: string | null
-          shop_hours?: string | null
-          shop_mdse?: string | null
-          shop_name?: string | null
-          shop_state?: string | null
-          shop_state_m?: string | null
-          shop_website?: string | null
-          shop_zip?: string | null
-          shop_zip_m?: string | null
-          ShopID?: string | null
-          updated_at?: string | null
-          votes_count?: number | null
-        }
-        Update: {
-          approved?: boolean | null
-          created_at?: string | null
-          rating?: number | null
-          shop_addr_1?: string | null
-          shop_addr_1_m?: string | null
-          shop_addr_2?: string | null
-          shop_addr_2_m?: string | null
-          shop_city?: string | null
-          shop_city_m?: string | null
-          shop_hours?: string | null
-          shop_mdse?: string | null
-          shop_name?: string | null
-          shop_state?: string | null
-          shop_state_m?: string | null
-          shop_website?: string | null
-          shop_zip?: string | null
-          shop_zip_m?: string | null
-          ShopID?: string | null
-          updated_at?: string | null
-          votes_count?: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       [_ in never]: never
