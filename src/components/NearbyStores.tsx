@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { formatMerchandise } from '@/lib/utils';
 
 interface Store {
   id: string;
@@ -197,7 +198,7 @@ export const NearbyStores = ({ onStoreSelect, onStoreClick }: NearbyStoresProps)
       votes: store.votes_count || 0,
       rating: Number(store.rating || 0),
       testimonials: [],
-      category: store.shop_mdse || 'Retail',
+      category: formatMerchandise(store.shop_mdse),
       approved: store.approved ?? false
     }));
   };

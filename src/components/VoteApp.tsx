@@ -19,6 +19,7 @@ import { StoreDetailsModal } from './StoreDetailsModal';
 import { NearbyStores } from './NearbyStores';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { formatMerchandise } from '@/lib/utils';
 
 interface Store {
   id: string;
@@ -72,7 +73,7 @@ const VoteApp = () => {
     votes: row.votes_count ?? 0,
     rating: Number(row.rating ?? 0),
     testimonials: [],
-    category: row.shop_mdse ?? 'Retail',
+    category: formatMerchandise(row.shop_mdse),
     approved: row.approved ?? false,
   });
 
