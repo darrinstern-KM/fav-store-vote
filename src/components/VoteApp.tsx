@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { SearchIcon, Trophy, Star, MapPin, Clock, User, LogOut } from 'lucide-react';
+import { SearchIcon, Trophy, Star, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,7 @@ import { ShareButton } from './ShareButton';
 import { StorePromotion } from './StorePromotion';
 import { StoreDetailsModal } from './StoreDetailsModal';
 import { NearbyStores } from './NearbyStores';
+import { Header } from './Header';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { formatMerchandise } from '@/lib/utils';
@@ -49,8 +50,6 @@ const VoteApp = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [showVoteModal, setShowVoteModal] = useState(false);
-  const [showAddStoreModal, setShowAddStoreModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showStoreDetailsModal, setShowStoreDetailsModal] = useState(false);
   const [selectedStoreForDetails, setSelectedStoreForDetails] = useState<Store | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -127,7 +126,10 @@ const VoteApp = () => {
 
   const handleVote = (store: Store) => {
     if (!user) {
-      setShowAuthModal(true);
+      toast({
+        title: "Please log in to vote",
+        description: "You need to be logged in to vote for stores.",
+      });
       return;
     }
     setSelectedStore(store);
@@ -157,34 +159,7 @@ const VoteApp = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-background border-b px-4 py-4">
-        <div className="container mx-auto max-w-6xl flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-8 w-8 text-vote-primary" />
-            <span className="text-xl font-bold font-playfair">Craft Retail Champions</span>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            {user ? (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <span className="text-sm">{user.email}</span>
-                </div>
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                  <LogOut className="h-4 w-4 mr-1" />
-                  Logout
-                </Button>
-              </div>
-            ) : (
-              <Button onClick={() => setShowAuthModal(true)}>
-                Login to Vote
-              </Button>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header user={user} onLogout={handleLogout} onAuthSuccess={handleAuthSuccess} />
 
       {/* Hero Section */}
       <section className="bg-gradient-hero py-16 px-4 text-center text-white">
@@ -228,7 +203,14 @@ const VoteApp = () => {
           <div className="mx-auto max-w-2xl">
             <StoreSearch 
               onStoreSelect={(store) => handleVote(store)}
-              onAddNewStore={() => user ? setShowAddStoreModal(true) : setShowAuthModal(true)}
+              onAddNewStore={() => {
+                if (!user) {
+                  toast({
+                    title: "Please log in to add stores",
+                    description: "You need to be logged in to add new stores.",
+                  });
+                }
+              }}
               onStoreClick={handleStoreClick}
             />
           </div>
@@ -248,7 +230,14 @@ const VoteApp = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
               <Button 
-                onClick={() => user ? setShowAddStoreModal(true) : setShowAuthModal(true)}
+                onClick={() => {
+                  if (!user) {
+                    toast({
+                      title: "Please log in to add stores",
+                      description: "You need to be logged in to add new stores.",
+                    });
+                  }
+                }}
                 variant="outline"
                 className="bg-white/80 hover:bg-white"
               >
@@ -436,18 +425,6 @@ const VoteApp = () => {
         isOpen={showVoteModal}
         onClose={() => setShowVoteModal(false)}
         user={user}
-      />
-      
-      <AddStoreModal
-        isOpen={showAddStoreModal}
-        onClose={() => setShowAddStoreModal(false)}
-        user={user}
-      />
-
-      <AuthModal
-        isOpen={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onAuthSuccess={handleAuthSuccess}
       />
 
       <StoreDetailsModal
