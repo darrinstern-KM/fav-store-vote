@@ -52,6 +52,16 @@ export const Header = ({ user, onLogout, onAuthSuccess }: HeaderProps) => {
                 <Building className="w-4 h-4" />
                 <span>Sponsors</span>
               </Link>
+
+              <Link 
+                to="/media-kit" 
+                className={`flex items-center space-x-1 px-3 py-2 rounded-md transition-colors ${
+                  isActive('/media-kit') ? 'bg-muted text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Award className="w-4 h-4" />
+                <span>Media Kit</span>
+              </Link>
               
               <Link 
                 to="/about" 

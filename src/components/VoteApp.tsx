@@ -161,35 +161,33 @@ const VoteApp = () => {
     <div className="min-h-screen bg-background">
       <Header user={user} onLogout={handleLogout} onAuthSuccess={handleAuthSuccess} />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-hero py-16 px-4 text-center text-white">
-        <div className="container mx-auto max-w-4xl">
-          <Trophy className="mx-auto mb-6 h-16 w-16 text-winner-gold" />
-          <h1 className="mb-3 text-5xl font-bold font-playfair">Craft Retail Champions</h1>
-          <p className="mb-2 text-lg opacity-90 font-playfair">Vote for the Best in Craft Retail!</p>
-          <p className="mb-6 text-xl opacity-90">Craft Your Passion, Celebrate Creativity! Cast your vote for the craft stores that inspire and supply our community. From local gems to online favorites, your vote helps crown the 2025 Craft Retail Champions. Join thousands of crafters, share your favorites, and discover top shops!</p>
-          
-          {/* Sponsor Branding */}
-          <div className="mb-8 bg-white/10 backdrop-blur-sm rounded-lg p-6">
-            <p className="text-sm opacity-80 mb-4">This competition is proudly supported by:</p>
-            <div className="flex flex-wrap items-center justify-center gap-6">
-              <div className="flex items-center gap-2">
-                <img src="/lovable-uploads/3bd255e3-a72d-40f7-8ed5-1247212390a5.png" alt="h+h americas" className="h-12 w-auto" />
-              </div>
-              <div className="flex items-center gap-2">
-                <img src="/lovable-uploads/d80dca82-3afa-455c-a057-33f1f6967df0.png" alt="Fiber+Fabric Craft Festival" className="h-12 w-auto" />
-              </div>
-              <div className="text-white/90 font-semibold text-lg">
-                Koelnmesse Inc.
-              </div>
-            </div>
-          </div>
-          
+      {/* Hero Section with Background Image */}
+      <section 
+        className="relative py-24 px-4 text-center text-white overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.4)), url('/src/assets/hero-craft-retail.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="container mx-auto max-w-5xl relative z-10">
+          <Trophy className="mx-auto mb-8 h-20 w-20 text-winner-gold animate-pulse" />
+          <h1 className="mb-6 text-6xl md:text-7xl font-bold font-playfair leading-tight">
+            Craft Retail Champions
+          </h1>
+          <p className="mb-4 text-2xl font-playfair font-medium">Vote for the Best in Craft Retail!</p>
+          <p className="mb-12 text-xl max-w-4xl mx-auto leading-relaxed">
+            Craft Your Passion, Celebrate Creativity! Cast your vote for the craft stores that inspire and supply our community. 
+            From local gems to online favorites, your vote helps crown the 2025 Craft Retail Champions. 
+            Join thousands of crafters, share your favorites, and discover top shops!
+          </p>
+
           {/* Contest Timer and Share */}
-          <div className="flex flex-col items-center gap-4 mb-8">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-6 py-3 backdrop-blur-sm">
-              <Clock className="h-5 w-5" />
-              <span className="font-semibold">Contest ends in {timeLeft} days</span>
+          <div className="flex flex-col items-center gap-6 mb-12">
+            <div className="inline-flex items-center gap-3 rounded-full bg-white/20 px-8 py-4 backdrop-blur-sm text-lg font-semibold">
+              <Clock className="h-6 w-6" />
+              <span>Contest ends in {timeLeft} days</span>
             </div>
             <ShareButton 
               title="Craft Retail Champions – Vote Now"
@@ -200,7 +198,7 @@ const VoteApp = () => {
           </div>
 
           {/* Search Section */}
-          <div className="mx-auto max-w-2xl">
+          <div className="mx-auto max-w-2xl bg-white/10 backdrop-blur-sm rounded-2xl p-8" data-search-section>
             <StoreSearch 
               onStoreSelect={(store) => handleVote(store)}
               onAddNewStore={() => {
@@ -213,6 +211,24 @@ const VoteApp = () => {
               }}
               onStoreClick={handleStoreClick}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Sponsor Branding - moved below hero */}
+      <section className="py-12 px-4 bg-secondary/10">
+        <div className="container mx-auto max-w-4xl text-center">
+          <p className="text-lg font-semibold mb-8 text-foreground">Craft Retail Champions is owned and managed by:</p>
+          <div className="flex flex-wrap items-center justify-center gap-8">
+            <div className="flex items-center gap-2">
+              <img src="/lovable-uploads/3bd255e3-a72d-40f7-8ed5-1247212390a5.png" alt="h+h americas" className="h-16 w-auto" />
+            </div>
+            <div className="flex items-center gap-2">
+              <img src="/lovable-uploads/d80dca82-3afa-455c-a057-33f1f6967df0.png" alt="Fiber+Fabric Craft Festival" className="h-16 w-auto" />
+            </div>
+            <div className="flex items-center gap-2">
+              <img src="/lovable-uploads/3bd255e3-a72d-40f7-8ed5-1247212390a5.png" alt="Koelnmesse" className="h-16 w-auto" />
+            </div>
           </div>
         </div>
       </section>
@@ -382,6 +398,119 @@ const VoteApp = () => {
 
       {/* SMS Voting Guide */}
       <SMSVotingGuide />
+
+      {/* Winner Benefits & Voter Lottery */}
+      <section className="py-16 px-4 bg-gradient-hero text-white">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <h2 className="mb-4 text-4xl font-bold font-playfair">What's At Stake</h2>
+            <p className="text-xl opacity-90 max-w-3xl mx-auto">
+              Winning stores gain incredible exposure and voters get a chance to win amazing prizes
+            </p>
+          </div>
+
+          <div className="grid gap-12 lg:grid-cols-2">
+            {/* Winner Benefits */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-winner-gold rounded-full flex items-center justify-center">
+                  <Trophy className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold">Store Winners Get</h3>
+              </div>
+              <div className="space-y-4 text-lg">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-winner-gold rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold text-white">✓</span>
+                  </div>
+                  <p>Featured promotion across our trade show network</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-winner-gold rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold text-white">✓</span>
+                  </div>
+                  <p>Marketing materials and press release templates</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-winner-gold rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold text-white">✓</span>
+                  </div>
+                  <p>Champion badge and certificate for display</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-winner-gold rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold text-white">✓</span>
+                  </div>
+                  <p>Social media spotlight and community recognition</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-winner-gold rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold text-white">✓</span>
+                  </div>
+                  <p>Exclusive winner networking opportunities</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Voter Lottery */}
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-vote-primary rounded-full flex items-center justify-center">
+                  <Star className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold">Voters Enter to Win</h3>
+              </div>
+              <div className="space-y-4 text-lg">
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-vote-primary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold text-white">✓</span>
+                  </div>
+                  <p>$500 craft store shopping spree (Grand Prize)</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-vote-primary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold text-white">✓</span>
+                  </div>
+                  <p>Exclusive craft supply bundles from sponsors</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-vote-primary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold text-white">✓</span>
+                  </div>
+                  <p>Free trade show passes and workshop access</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-6 h-6 bg-vote-primary rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-sm font-bold text-white">✓</span>
+                  </div>
+                  <p>Premium crafting tools and equipment</p>
+                </div>
+                <div className="bg-winner-gold/20 rounded-lg p-4 mt-6">
+                  <p className="text-sm font-semibold">
+                    🎲 Every vote = 1 lottery entry. More votes = better chances!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-12">
+            <p className="text-lg opacity-90 mb-6">
+              Ready to make a difference in the craft retail community?
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-white text-vote-primary hover:bg-white/90 text-lg px-8 py-3"
+              onClick={() => {
+                const searchSection = document.querySelector('[data-search-section]');
+                searchSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Start Voting Now
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* How it Works */}
       <section className="bg-secondary py-16 px-4">
