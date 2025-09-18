@@ -227,7 +227,7 @@ const VoteApp = () => {
               <img src="/lovable-uploads/d80dca82-3afa-455c-a057-33f1f6967df0.png" alt="Fiber+Fabric Craft Festival" className="h-16 w-auto" />
             </div>
             <div className="flex items-center gap-2">
-              <img src="/lovable-uploads/3bd255e3-a72d-40f7-8ed5-1247212390a5.png" alt="Koelnmesse" className="h-16 w-auto" />
+              <img src="https://media.koelnmesse.io/koelnmesse/redaktionell/koelnmesse/img_40/koelnmesse_logo_claim.svg" alt="Koelnmesse" className="h-16 w-auto" />
             </div>
           </div>
         </div>
