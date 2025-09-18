@@ -41,10 +41,20 @@ export const NearbyStores = ({ onStoreSelect, onStoreClick }: NearbyStoresProps)
       );
       const data = await response.json();
       
+      // Check if user is in US or Canada for this year's competition
+      const allowedCountries = ['United States of America', 'Canada'];
+      const userCountry = data.countryName;
+      
+      if (!allowedCountries.includes(userCountry)) {
+        console.log(`Competition currently limited to US and Canada. User location: ${userCountry}`);
+        return null; // Will fall back to national top stores
+      }
+      
       return {
         zip: data.postcode,
         city: data.city,
-        state: data.principalSubdivision
+        state: data.principalSubdivision,
+        country: userCountry
       };
     } catch (error) {
       console.error('Reverse geocoding failed:', error);
@@ -225,7 +235,7 @@ export const NearbyStores = ({ onStoreSelect, onStoreClick }: NearbyStoresProps)
           <div className="flex items-center justify-center gap-2">
             <TrendingUp className="h-7 w-7 text-vote-primary" />
             <h2 className="text-3xl font-bold text-foreground font-playfair">
-              {userLocation.city ? `Top Stores Near ${userLocation.city}` : 'Top-Voted Stores'}
+              {userLocation.city ? `Stores Near You - Vote for Your Favorite Today` : 'Top Stores - Vote for Your Favorite Today'}
             </h2>
           </div>
           {userLocation.city && userLocation.state && (
