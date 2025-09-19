@@ -100,7 +100,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_stores: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          approved: boolean
+          created_at: string
+          rating: number
+          shop_addr_1: string
+          shop_addr_2: string
+          shop_city: string
+          shop_hours: string
+          shop_mdse: string
+          shop_name: string
+          shop_state: string
+          shop_website: string
+          shop_zip: string
+          shopid: string
+          updated_at: string
+          votes_count: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
