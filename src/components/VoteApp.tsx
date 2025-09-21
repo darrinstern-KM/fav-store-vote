@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
 import { SearchIcon, Trophy, Star, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -604,9 +603,27 @@ const VoteApp = () => {
               <span className="text-muted-foreground">|</span>
               <a href="#" className="text-muted-foreground hover:text-vote-primary transition-colors">Security and Data Protection</a>
               <span className="text-muted-foreground">|</span>
-              <Link to="/cookie-notice" className="text-muted-foreground hover:text-vote-primary transition-colors">Cookie Notice</Link>
+              <a 
+                href="/cookie-notice" 
+                className="text-muted-foreground hover:text-vote-primary transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.href = '/cookie-notice';
+                }}
+              >
+                Cookie Notice
+              </a>
               <span className="text-muted-foreground">|</span>
-              <Link to="/sitemap" className="text-muted-foreground hover:text-vote-primary transition-colors">Sitemap</Link>
+              <a 
+                href="/sitemap" 
+                className="text-muted-foreground hover:text-vote-primary transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.href = '/sitemap';
+                }}
+              >
+                Sitemap
+              </a>
             </div>
           </div>
         </div>
