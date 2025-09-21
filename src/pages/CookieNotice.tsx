@@ -122,13 +122,13 @@ const CookieNotice = () => {
               <div className="mt-4 text-muted-foreground">
                 <p>Email: info@koelnmesse.com</p>
                 <p>Phone: +1 (773) 326-9920</p>
-                <p>Address: 222 Merchandise Mart Plaza, Suite 470, Chicago, IL 60654</p>
+                <p>Address: 8770 West Bryn Mawr Avenue, Suite 1300, Chicago, Illinois 60631, USA</p>
               </div>
             </section>
 
             <div className="mt-8 p-4 bg-muted rounded-lg">
               <p className="text-sm text-muted-foreground">
-                <strong>Last updated:</strong> September 2024
+                <strong>Last updated:</strong> January 2025
               </p>
             </div>
           </div>
