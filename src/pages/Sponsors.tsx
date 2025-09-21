@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink, Award, Star } from 'lucide-react';
@@ -45,6 +47,7 @@ const Sponsors = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header user={null} onLogout={() => {}} />
       <main className="container mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">
@@ -129,6 +132,7 @@ const Sponsors = () => {
           </a>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

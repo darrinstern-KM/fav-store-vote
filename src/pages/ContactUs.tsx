@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 
@@ -163,6 +164,7 @@ const ContactUs = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

@@ -18,6 +18,7 @@ import { StorePromotion } from './StorePromotion';
 import { StoreDetailsModal } from './StoreDetailsModal';
 import { NearbyStores } from './NearbyStores';
 import { Header } from './Header';
+import { Footer } from './Footer';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { formatMerchandise } from '@/lib/utils';
@@ -521,113 +522,7 @@ const VoteApp = () => {
         </div>
       </section>
 
-      {/* Corporate Footer */}
-      <footer className="bg-background border-t">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid gap-8 lg:grid-cols-4 md:grid-cols-2">
-            {/* Logo and Description */}
-            <div className="lg:col-span-2 space-y-4">
-              <div className="flex items-center gap-2">
-                <Trophy className="h-8 w-8 text-vote-primary" />
-                <span className="text-2xl font-bold text-foreground font-playfair">
-                  Craft Retail Champions
-                </span>
-              </div>
-              <p className="text-muted-foreground max-w-md">
-                Celebrating excellence in craft retail across North America. Supporting local businesses and connecting communities through craft.
-              </p>
-            </div>
-
-            {/* Quick Links */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-foreground">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="/about" className="hover:text-vote-primary transition-colors">About</a></li>
-                <li><a href="/media-kit" className="hover:text-vote-primary transition-colors">Media Kit</a></li>
-                <li><a href="/sponsors" className="hover:text-vote-primary transition-colors">Sponsors</a></li>
-                <li><a href="#" className="hover:text-vote-primary transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-vote-primary transition-colors">Terms of Service</a></li>
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div className="space-y-4">
-              <h4 className="font-semibold text-foreground">Contact</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-vote-primary transition-colors">Support</a></li>
-                <li><a href="#" className="hover:text-vote-primary transition-colors">Media Inquiries</a></li>
-                <li><a href="#" className="hover:text-vote-primary transition-colors">Partnership</a></li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Owned & Organized by */}
-          <div className="mt-12 pt-8 border-t border-border">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div className="space-y-4">
-                <h5 className="font-semibold text-foreground">Owned & Managed by:</h5>
-                <div className="flex items-center gap-4">
-                  <img 
-                    src="https://media.koelnmesse.io/koelnmesse/redaktionell/koelnmesse/img_40/koelnmesse_logo_claim.svg" 
-                    alt="Koelnmesse"
-                    className="h-12 max-w-[200px] object-contain"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h5 className="font-semibold text-foreground">Industry Partner:</h5>
-                <div className="flex items-center gap-4">
-                  <img 
-                    src="/lovable-uploads/d80dca82-3afa-455c-a057-33f1f6967df0.png" 
-                    alt="Industry Partner"
-                    className="h-12 max-w-[200px] object-contain"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Copyright and Legal */}
-          <div className="mt-8 pt-6 border-t border-border">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 text-sm text-muted-foreground">
-              <div className="space-y-2">
-                <p>
-                  © Copyright 2024 | Koelnmesse Inc. | All Rights Reserved. The Fiber+Fabric Craft Festival & h+h americas logo is a registered trademark of Koelnmesse Inc.
-                </p>
-              </div>
-            </div>
-            
-            <div className="mt-4 flex flex-wrap gap-4 text-sm">
-              <a href="#" className="text-muted-foreground hover:text-vote-primary transition-colors">Legal Notice</a>
-              <span className="text-muted-foreground">|</span>
-              <a href="#" className="text-muted-foreground hover:text-vote-primary transition-colors">Security and Data Protection</a>
-              <span className="text-muted-foreground">|</span>
-              <a 
-                href="/cookie-notice" 
-                className="text-muted-foreground hover:text-vote-primary transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.href = '/cookie-notice';
-                }}
-              >
-                Cookie Notice
-              </a>
-              <span className="text-muted-foreground">|</span>
-              <a 
-                href="/sitemap" 
-                className="text-muted-foreground hover:text-vote-primary transition-colors"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.location.href = '/sitemap';
-                }}
-              >
-                Sitemap
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Modals */}
       <VoteModal
