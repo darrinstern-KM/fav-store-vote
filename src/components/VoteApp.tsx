@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { SearchIcon, Trophy, Star, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -603,9 +604,9 @@ const VoteApp = () => {
               <span className="text-muted-foreground">|</span>
               <a href="#" className="text-muted-foreground hover:text-vote-primary transition-colors">Security and Data Protection</a>
               <span className="text-muted-foreground">|</span>
-              <a href="#" className="text-muted-foreground hover:text-vote-primary transition-colors">Cookie Notice</a>
+              <Link to="/cookie-notice" className="text-muted-foreground hover:text-vote-primary transition-colors">Cookie Notice</Link>
               <span className="text-muted-foreground">|</span>
-              <a href="#" className="text-muted-foreground hover:text-vote-primary transition-colors">Sitemap</a>
+              <Link to="/sitemap" className="text-muted-foreground hover:text-vote-primary transition-colors">Sitemap</Link>
             </div>
           </div>
         </div>

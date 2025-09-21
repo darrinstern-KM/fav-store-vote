@@ -7,6 +7,8 @@ import Index from "./pages/Index";
 import Sponsors from "./pages/Sponsors";
 import About from "./pages/About";
 import MediaKit from "./pages/MediaKit";
+import Sitemap from "./pages/Sitemap";
+import CookieNotice from "./pages/CookieNotice";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +24,8 @@ const App = () => (
           <Route path="/sponsors" element={<Sponsors />} />
           <Route path="/media-kit" element={<MediaKit />} />
           <Route path="/about" element={<About />} />
+          <Route path="/sitemap" element={<Sitemap />} />
+          <Route path="/cookie-notice" element={<CookieNotice />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
