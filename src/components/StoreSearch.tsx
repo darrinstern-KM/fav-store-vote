@@ -43,7 +43,7 @@ export const StoreSearch = ({ onStoreSelect, onAddNewStore, onStoreClick }: Stor
     try {
       let query = supabase
         .from('stores')
-        .select('*')
+        .select('id, ShopID, shop_name, shop_addr_1, shop_addr_2, shop_city, shop_state, shop_zip, shop_addr_1_m, shop_addr_2_m, shop_city_m, shop_state_m, shop_zip_m, shop_website, shop_hours, shop_mdse, approved, votes_count, rating, created_at, updated_at')
         .eq('approved', true);
 
       // Check if search term is a 5-digit zip code for exact matching
