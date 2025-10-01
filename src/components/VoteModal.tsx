@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { Star, MapPin, X } from 'lucide-react';
+import { Star, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { voteSchema } from '@/lib/validation';
 
 interface Store {
   id: string;
+  shopId?: string;
   name: string;
   address: string;
   city: string;
@@ -49,45 +52,81 @@ export const VoteModal = ({ store, isOpen, onClose, user }: VoteModalProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!rating) {
-      toast({
-        title: "Please select a rating",
-        variant: "destructive"
+    if (!store) return;
+
+    try {
+      // Validate input
+      const validated = voteSchema.parse({
+        rating,
+        email,
+        phone,
+        city,
+        state,
+        testimonial,
+        smsConsent: phone ? smsConsent : false,
       });
-      return;
-    }
 
-    if (!email && !phone) {
-      toast({
-        title: "Please provide either email or phone number",
-        variant: "destructive"
-      });
-      return;
-    }
+      if (phone && !smsConsent) {
+        toast({
+          title: "SMS consent required",
+          description: "Please consent to SMS messages when providing a phone number",
+          variant: "destructive"
+        });
+        return;
+      }
 
-    if (!city || !state) {
-      toast({
-        title: "Please provide your city and state",
-        variant: "destructive"
-      });
-      return;
-    }
+      setIsSubmitting(true);
 
-    if (phone && !smsConsent) {
-      toast({
-        title: "SMS consent required when providing phone number",
-        variant: "destructive"
-      });
-      return;
-    }
+      // Get current user
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (!authUser) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in to vote",
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
-    setIsSubmitting(true);
+      // Insert vote
+      const { error } = await supabase
+        .from('votes')
+        .insert({
+          user_id: authUser.id,
+          store_id: store.shopId || store.id,
+          rating: validated.rating,
+          comment: validated.testimonial || null,
+          voter_email: validated.email || null,
+          voter_phone: validated.phone || null,
+          voter_city: validated.city,
+          voter_state: validated.state,
+          sms_consent: validated.smsConsent,
+          voting_method: 'web',
+        });
 
-    // Simulate API call
-    setTimeout(() => {
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Already voted",
+            description: "You have already voted for this store",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Error submitting vote",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
       toast({
         title: "Vote submitted successfully!",
-        description: `Thank you for voting for ${store?.name}`,
+        description: `Thank you for voting for ${store.name}`,
       });
       
       // Reset form
@@ -98,9 +137,16 @@ export const VoteModal = ({ store, isOpen, onClose, user }: VoteModalProps) => {
       setState('');
       setTestimonial('');
       setSmsConsent(false);
-      setIsSubmitting(false);
       onClose();
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Validation error",
+        description: error.errors?.[0]?.message || "Please check your input",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!store) return null;
@@ -164,6 +210,7 @@ export const VoteModal = ({ store, isOpen, onClose, user }: VoteModalProps) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
+                    maxLength={255}
                   />
                 </div>
                 
@@ -175,6 +222,7 @@ export const VoteModal = ({ store, isOpen, onClose, user }: VoteModalProps) => {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(555) 123-4567"
+                    maxLength={20}
                   />
                   {phone && (
                     <div className="flex items-center space-x-2">
@@ -205,17 +253,19 @@ export const VoteModal = ({ store, isOpen, onClose, user }: VoteModalProps) => {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="Springfield"
+                    maxLength={100}
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="state">State</Label>
+                  <Label htmlFor="state">State (2 letters)</Label>
                   <Input
                     id="state"
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
+                    onChange={(e) => setState(e.target.value.toUpperCase())}
                     placeholder="IL"
+                    maxLength={2}
                     required
                   />
                 </div>
@@ -233,6 +283,7 @@ export const VoteModal = ({ store, isOpen, onClose, user }: VoteModalProps) => {
                 onChange={(e) => setTestimonial(e.target.value)}
                 placeholder="Tell us why this store deserves your vote..."
                 className="min-h-[100px]"
+                maxLength={1000}
               />
             </div>
 

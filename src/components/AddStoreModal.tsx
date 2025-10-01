@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { storeSubmissionSchema } from '@/lib/validation';
 
 interface User {
   email: string;
@@ -45,18 +47,48 @@ export const AddStoreModal = ({ isOpen, onClose, user }: AddStoreModalProps) => 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!storeName || !address || !city || !state || !zipCode || !category) {
-      toast({
-        title: "Please fill in all required fields",
-        variant: "destructive"
+    try {
+      // Validate input
+      const validated = storeSubmissionSchema.parse({
+        storeName,
+        address,
+        city,
+        state,
+        zipCode,
+        category,
       });
-      return;
-    }
 
-    setIsSubmitting(true);
+      setIsSubmitting(true);
 
-    // Simulate API call to add store - stores need admin approval
-    setTimeout(() => {
+      // Generate unique ShopID
+      const shopId = `STORE-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+
+      // Insert store submission (requires approval)
+      const { error } = await supabase
+        .from('stores')
+        .insert({
+          ShopID: shopId,
+          shop_name: validated.storeName,
+          shop_addr_1: validated.address,
+          shop_city: validated.city,
+          shop_state: validated.state,
+          shop_zip: validated.zipCode,
+          shop_mdse: validated.category,
+          approved: false,
+          votes_count: 0,
+          rating: 0,
+        });
+
+      if (error) {
+        toast({
+          title: "Error submitting store",
+          description: error.message,
+          variant: "destructive"
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       toast({
         title: "Store submitted for approval!",
         description: "Your store will be reviewed by our team and added to the voting list once approved.",
@@ -69,9 +101,16 @@ export const AddStoreModal = ({ isOpen, onClose, user }: AddStoreModalProps) => 
       setState('');
       setZipCode('');
       setCategory('');
-      setIsSubmitting(false);
       onClose();
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        title: "Validation error",
+        description: error.errors?.[0]?.message || "Please check your input",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -103,6 +142,7 @@ export const AddStoreModal = ({ isOpen, onClose, user }: AddStoreModalProps) => 
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
                 placeholder="Best Buy, Target, Local Coffee Shop..."
+                maxLength={200}
                 required
               />
             </div>
@@ -136,6 +176,7 @@ export const AddStoreModal = ({ isOpen, onClose, user }: AddStoreModalProps) => 
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="123 Main Street"
+                maxLength={200}
                 required
               />
             </div>
@@ -151,19 +192,21 @@ export const AddStoreModal = ({ isOpen, onClose, user }: AddStoreModalProps) => 
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="Springfield"
+                  maxLength={100}
                   required
                 />
               </div>
               
               <div className="space-y-2">
                 <Label htmlFor="store-state" className="text-base font-semibold">
-                  State *
+                  State (2 letters) *
                 </Label>
                 <Input
                   id="store-state"
                   value={state}
-                  onChange={(e) => setState(e.target.value)}
+                  onChange={(e) => setState(e.target.value.toUpperCase())}
                   placeholder="IL"
+                  maxLength={2}
                   required
                 />
               </div>
@@ -177,6 +220,7 @@ export const AddStoreModal = ({ isOpen, onClose, user }: AddStoreModalProps) => 
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   placeholder="62701"
+                  pattern="\d{5}"
                   required
                 />
               </div>

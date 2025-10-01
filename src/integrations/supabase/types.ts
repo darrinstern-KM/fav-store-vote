@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       stores: {
         Row: {
           approved: boolean | null
@@ -95,6 +119,80 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      votes: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          sms_consent: boolean | null
+          store_id: string
+          user_id: string
+          voter_city: string | null
+          voter_email: string | null
+          voter_phone: string | null
+          voter_state: string | null
+          voting_method: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          sms_consent?: boolean | null
+          store_id: string
+          user_id: string
+          voter_city?: string | null
+          voter_email?: string | null
+          voter_phone?: string | null
+          voter_state?: string | null
+          voting_method?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          sms_consent?: boolean | null
+          store_id?: string
+          user_id?: string
+          voter_city?: string | null
+          voter_email?: string | null
+          voter_phone?: string | null
+          voter_state?: string | null
+          voting_method?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["ShopID"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -120,9 +218,16 @@ export type Database = {
           votes_count: number
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -249,6 +354,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

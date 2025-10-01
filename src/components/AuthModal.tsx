@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { loginSchema, signupSchema } from '@/lib/validation';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,33 +25,123 @@ export const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) =>
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate login - check for admin email
-    setTimeout(() => {
-      const isAdmin = email === 'admin@example.com';
-      toast({
-        title: "Login successful!",
-        description: isAdmin ? "Welcome admin!" : "You can now vote for your favorite stores.",
+    try {
+      // Validate input
+      const validated = loginSchema.parse({ email, password });
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: validated.email,
+        password: validated.password,
       });
-      onAuthSuccess({ email, zipCode, isAdmin });
-      onClose();
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast({
+            title: "Login failed",
+            description: "Invalid email or password",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Login failed",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
+        return;
+      }
+
+      if (data.user) {
+        // Check if user has admin role
+        const { data: roles } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id);
+
+        const isAdmin = roles?.some(r => r.role === 'admin') ?? false;
+
+        toast({
+          title: "Login successful!",
+          description: isAdmin ? "Welcome admin!" : "You can now vote for your favorite stores.",
+        });
+        
+        onAuthSuccess({ 
+          email: data.user.email, 
+          zipCode: data.user.user_metadata?.zip_code || '', 
+          isAdmin 
+        });
+        onClose();
+      }
+    } catch (error: any) {
+      toast({
+        title: "Validation error",
+        description: error.errors?.[0]?.message || "Please check your input",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulate signup
-    setTimeout(() => {
-      toast({
-        title: "Account created!",
-        description: "You can now vote for your favorite stores.",
+    try {
+      // Validate input
+      const validated = signupSchema.parse({ email, password, zipCode });
+      
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email: validated.email,
+        password: validated.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            zip_code: validated.zipCode,
+          }
+        }
       });
-      onAuthSuccess({ email, zipCode, isAdmin: false });
-      onClose();
+
+      if (error) {
+        if (error.message.includes('already registered')) {
+          toast({
+            title: "Account exists",
+            description: "This email is already registered. Please login instead.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Signup failed",
+            description: error.message,
+            variant: "destructive"
+          });
+        }
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Account created!",
+          description: "Please check your email to verify your account.",
+        });
+        onAuthSuccess({ 
+          email: data.user.email, 
+          zipCode: validated.zipCode, 
+          isAdmin: false 
+        });
+        onClose();
+      }
+    } catch (error: any) {
+      toast({
+        title: "Validation error",
+        description: error.errors?.[0]?.message || "Please check your input",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -57,9 +149,6 @@ export const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) =>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Login to Vote</DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            Demo admin: admin@example.com (any password)
-          </p>
         </DialogHeader>
 
         <Tabs defaultValue="login" className="w-full">
@@ -112,13 +201,14 @@ export const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) =>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="signup-password">Password</Label>
+                <Label htmlFor="signup-password">Password (min 6 characters)</Label>
                 <Input
                   id="signup-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  minLength={6}
                 />
               </div>
               
@@ -129,6 +219,7 @@ export const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) =>
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
                   placeholder="12345"
+                  pattern="\d{5}"
                   required
                 />
               </div>
