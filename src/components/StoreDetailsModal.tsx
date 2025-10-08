@@ -1,25 +1,21 @@
-import { MapPin, Star, ExternalLink, Users, MessageSquare, Calendar, Mail, Clock } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { X, MapPin, Star, Clock, Mail, Globe, Phone, Navigation, Zap, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { ShareButton } from './ShareButton';
 
 interface Store {
   id: string;
-  shopId?: string; // Internal use only - not displayed
   name: string;
   address: string;
   city: string;
   state: string;
   zipCode: string;
-  shopEmail?: string; // Display on profile
-  shopOwner?: string; // Internal use only - not displayed
-  shopHours?: string; // Display on profile
+  shopEmail?: string;
+  shopHours?: string;
   votes: number;
   rating: number;
-  testimonials: string[];
   category: string;
-  approved: boolean;
+  testimonials?: string[];
 }
 
 interface StoreDetailsModalProps {
@@ -30,180 +26,194 @@ interface StoreDetailsModalProps {
 }
 
 export const StoreDetailsModal = ({ store, isOpen, onClose, onVote }: StoreDetailsModalProps) => {
-  if (!store) return null;
-
-  const fullAddress = `${store.address}, ${store.city}, ${store.state} ${store.zipCode}`;
-  const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
-  const googleMapsEmbedUrl = `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(fullAddress)}`;
+  if (!isOpen || !store) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">{store.name}</DialogTitle>
-        </DialogHeader>
-        
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Store Information */}
-          <div className="space-y-6">
-            {/* Basic Info */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-vote-primary mt-1 flex-shrink-0" />
-                    <div>
-                      <p className="font-medium">{store.address}</p>
-                      <p className="text-muted-foreground">{store.city}, {store.state} {store.zipCode}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <Badge variant="outline" className="text-sm">
-                      {store.category}
-                    </Badge>
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4 text-vote-primary" />
-                      <span className="font-semibold text-vote-primary">{store.votes}</span>
-                      <span className="text-muted-foreground">votes</span>
-                    </div>
-                  </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
 
-                   <div className="flex items-center gap-2">
-                     <div className="flex">
-                       {[...Array(5)].map((_, i) => (
-                         <Star
-                           key={i}
-                           className={`h-4 w-4 ${
-                             i < Math.floor(store.rating)
-                               ? 'fill-winner-gold text-winner-gold'
-                               : 'text-muted-foreground'
-                           }`}
-                         />
-                       ))}
-                     </div>
-                     <span className="font-medium">{store.rating}</span>
-                     <span className="text-muted-foreground">rating</span>
-                   </div>
+      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 z-10 bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white rounded-t-3xl p-6">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+          >
+            <X className="h-5 w-5" />
+          </button>
 
-                   {/* Contact Information */}
-                   {store.shopEmail && (
-                     <div className="flex items-center gap-3">
-                       <Mail className="h-4 w-4 text-vote-primary" />
-                       <a 
-                         href={`mailto:${store.shopEmail}`}
-                         className="text-vote-primary hover:underline"
-                       >
-                         {store.shopEmail}
-                       </a>
-                     </div>
-                   )}
-
-                   {/* Store Hours */}
-                   {store.shopHours && (
-                     <div className="flex items-start gap-3">
-                       <Clock className="h-4 w-4 text-vote-primary mt-1 flex-shrink-0" />
-                       <div>
-                         <p className="font-medium">Store Hours</p>
-                         <p className="text-muted-foreground text-sm">{store.shopHours}</p>
-                       </div>
-                     </div>
-                   )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Testimonials */}
-            {store.testimonials.length > 0 && (
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <MessageSquare className="h-5 w-5 text-vote-primary" />
-                    <h3 className="font-semibold">Customer Testimonials</h3>
-                  </div>
-                  <div className="space-y-3">
-                    {store.testimonials.map((testimonial, index) => (
-                      <div key={index} className="bg-secondary/50 p-3 rounded-lg">
-                        <p className="text-sm italic">"{testimonial}"</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Actions */}
-            <div className="space-y-3">
-              <Button 
-                className="w-full bg-gradient-vote" 
-                size="lg"
-                onClick={() => onVote(store)}
-              >
-                Vote for {store.name}
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => window.open(googleMapsUrl, '_blank')}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                View on Google Maps
-              </Button>
+          <div className="pr-12">
+            <Badge className="bg-white/20 text-white border-white/30 mb-3">
+              {store.category}
+            </Badge>
+            <h2 className="text-3xl font-bold mb-2">{store.name}</h2>
+            <div className="flex items-center gap-2 text-white/90">
+              <MapPin className="h-4 w-4" />
+              <span>{store.city}, {store.state} {store.zipCode}</span>
             </div>
-          </div>
-
-          {/* Map Section */}
-          <div className="space-y-4">
-            <h3 className="font-semibold flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-vote-primary" />
-              Store Location
-            </h3>
-            
-            {/* Google Maps Embed - Note: Requires API key */}
-            <div className="bg-secondary/20 border rounded-lg p-8 text-center">
-              <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">
-                Interactive map view requires Google Maps API configuration
-              </p>
-              <Button 
-                variant="outline" 
-                onClick={() => window.open(googleMapsUrl, '_blank')}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open in Google Maps
-              </Button>
-            </div>
-
-            {/* Store Stats */}
-            <Card>
-              <CardContent className="p-6">
-                <h4 className="font-semibold mb-4">Contest Performance</h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Total Votes</span>
-                    <span className="font-semibold text-vote-primary">{store.votes}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Customer Rating</span>
-                    <span className="font-semibold">{store.rating}/5.0</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Testimonials</span>
-                    <span className="font-semibold">{store.testimonials.length}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Status</span>
-                    <Badge variant={store.approved ? "default" : "secondary"}>
-                      {store.approved ? "Verified" : "Pending"}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-4 border border-blue-100">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-sm font-medium text-slate-600">Total Votes</span>
+              </div>
+              <div className="text-3xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                {store.votes.toLocaleString()}
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-4 border border-yellow-100">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg flex items-center justify-center">
+                  <Star className="h-4 w-4 text-white fill-white" />
+                </div>
+                <span className="text-sm font-medium text-slate-600">Rating</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-3xl font-black bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent">
+                  {store.rating.toFixed(1)}
+                </div>
+                <div className="flex">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${
+                        i < Math.floor(store.rating)
+                          ? 'fill-yellow-400 text-yellow-400'
+                          : 'text-slate-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <Navigation className="h-5 w-5 text-blue-600" />
+              Store Information
+            </h3>
+
+            <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-slate-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="text-sm font-medium text-slate-600">Address</div>
+                  <div className="text-slate-800">
+                    {store.address}<br />
+                    {store.city}, {store.state} {store.zipCode}
+                  </div>
+                </div>
+              </div>
+
+              {store.shopHours && (
+                <div className="flex items-start gap-3 pt-3 border-t border-slate-200">
+                  <Clock className="h-5 w-5 text-slate-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-medium text-slate-600">Hours</div>
+                    <div className="text-slate-800">{store.shopHours}</div>
+                  </div>
+                </div>
+              )}
+
+              {store.shopEmail && (
+                <div className="flex items-start gap-3 pt-3 border-t border-slate-200">
+                  <Mail className="h-5 w-5 text-slate-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="text-sm font-medium text-slate-600">Email</div>
+                    <a 
+                      href={`mailto:${store.shopEmail}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      {store.shopEmail}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {store.testimonials && store.testimonials.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <Star className="h-5 w-5 text-yellow-500" />
+                Customer Reviews
+              </h3>
+              <div className="space-y-3">
+                {store.testimonials.slice(0, 3).map((testimonial, index) => (
+                  <div 
+                    key={index}
+                    className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 border border-blue-100"
+                  >
+                    <div className="flex items-start gap-2 mb-2">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="h-3 w-3 fill-yellow-400 text-yellow-400"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-700 italic">"{testimonial}"</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3 pt-4 border-t border-slate-200">
+            <Button
+              onClick={() => {
+                onVote(store);
+                onClose();
+              }}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Zap className="h-5 w-5 mr-2" />
+              Vote for {store.name}
+            </Button>
+
+            <div className="flex gap-3">
+              <ShareButton 
+                title={`Vote for ${store.name} in Craft Retail Champions!`}
+                url={`${window.location.origin}?store=${store.id}`}
+                description={`Help ${store.name} win! They have ${store.votes} votes and a ${store.rating} star rating.`}
+                variant="outline"
+                className="flex-1"
+              />
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                    `${store.name} ${store.address} ${store.city} ${store.state} ${store.zipCode}`
+                  )}`;
+                  window.open(mapsUrl, '_blank');
+                }}
+              >
+                <Navigation className="h-4 w-4 mr-2" />
+                Get Directions
+              </Button>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-4 border border-yellow-200">
+            <p className="text-sm text-slate-700 text-center">
+              💡 <span className="font-semibold">Support local craft retail!</span> Your vote helps {store.name} gain recognition and grow their community.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
