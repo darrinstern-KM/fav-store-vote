@@ -1,186 +1,206 @@
-import { useState } from 'react';
-import { Search, Plus, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { Search, MapPin, Plus, Loader2, Store, TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatMerchandise } from '@/lib/utils';
 
 interface Store {
   id: string;
-  shopId?: string; // Internal use only - not displayed
   name: string;
   address: string;
   city: string;
   state: string;
   zipCode: string;
-  shopEmail?: string; // Display on profile
-  shopOwner?: string; // Internal use only - not displayed
-  shopHours?: string; // Display on profile
   votes: number;
   rating: number;
-  testimonials: string[];
   category: string;
-  approved: boolean;
 }
 
 interface StoreSearchProps {
   onStoreSelect: (store: Store) => void;
   onAddNewStore: () => void;
-  onStoreClick?: (store: Store) => void;
+  onStoreClick: (store: Store) => void;
 }
 
 export const StoreSearch = ({ onStoreSelect, onAddNewStore, onStoreClick }: StoreSearchProps) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<Store[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [isFocused, setIsFocused] = useState(false);
 
-  const handleSearch = async () => {
-    const term = searchTerm.trim();
-    if (!term) return;
-    
-    setIsSearching(true);
-    try {
-      let query = supabase
-        .from('stores')
-        .select('id, ShopID, shop_name, shop_addr_1, shop_addr_2, shop_city, shop_state, shop_zip, shop_addr_1_m, shop_addr_2_m, shop_city_m, shop_state_m, shop_zip_m, shop_website, shop_hours, shop_mdse, approved, votes_count, rating, created_at, updated_at')
-        .eq('approved', true);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
-      // Check if search term is a 5-digit zip code for exact matching
-      const isZipCode = /^\d{5}$/.test(term);
+  const { data: searchResults = [], isLoading } = useQuery({
+    queryKey: ['storeSearch', debouncedSearch],
+    queryFn: async () => {
+      if (!debouncedSearch || debouncedSearch.length < 2) return [];
       
-      if (isZipCode) {
-        // Exact match for ZIP codes
-        query = query.eq('shop_zip', term);
-      } else {
-        // Use text search for other terms
-        query = query.or(`shop_name.ilike.%${term}%,shop_city.ilike.%${term}%,shop_state.ilike.%${term}%,shop_zip.ilike.%${term}%`);
-      }
-
-      const { data, error } = await query.limit(25);
+      const { data, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('approved', true)
+        .or(`shop_name.ilike.%${debouncedSearch}%,shop_city.ilike.%${debouncedSearch}%,shop_state.ilike.%${debouncedSearch}%,shop_zip.ilike.%${debouncedSearch}%`)
+        .order('votes_count', { ascending: false })
+        .limit(10);
 
       if (error) throw error;
 
-      const results = (data ?? []).map((row: any): Store => ({
-        id: row.id,
-        shopId: row.shop_id ?? undefined,
+      return (data || []).map((row: any) => ({
+        id: row.ShopID,
         name: row.shop_name ?? 'Unknown Store',
-        address: row.shop_addr_1 ?? row.shop_addr_1_m ?? '',
-        city: row.shop_city ?? row.shop_city_m ?? '',
-        state: row.shop_state ?? row.shop_state_m ?? '',
-        zipCode: row.shop_zip ?? row.shop_zip_m ?? '',
-        shopEmail: row.shop_email ?? undefined,
-        shopOwner: row.shop_owner ?? undefined,
-        shopHours: row.shop_hours ?? undefined,
+        address: row.shop_addr_1 ?? '',
+        city: row.shop_city ?? '',
+        state: row.shop_state ?? '',
+        zipCode: row.shop_zip ?? '',
         votes: row.votes_count ?? 0,
         rating: Number(row.rating ?? 0),
-        testimonials: [],
         category: formatMerchandise(row.shop_mdse),
-        approved: row.approved ?? false,
       }));
-
-      setSearchResults(results);
-    } catch (e) {
-      console.error('Search error', e);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
+    },
+    enabled: debouncedSearch.length >= 2,
+  });
 
   return (
-    <div className="space-y-6">
-      {/* Search Input */}
-      <div className="flex gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+    <div className="relative w-full">
+      <div className={`relative transition-all duration-300 ${isFocused ? 'scale-105' : ''}`}>
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
           <Input
-            placeholder="Enter ZIP code, city, or store name..."
+            type="text"
+            placeholder="Search by store name, city, or ZIP code..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="pl-10 py-6 text-lg text-foreground bg-white/90 backdrop-blur-sm border-white/20"
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setTimeout(() => setIsFocused(false), 200)}
+            className="pl-12 pr-4 py-6 text-lg bg-white border-2 border-slate-200 focus:border-blue-500 rounded-2xl shadow-lg focus:shadow-xl transition-all duration-300"
           />
+          {isLoading && (
+            <Loader2 className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-500 animate-spin" />
+          )}
         </div>
-        <Button 
-          onClick={handleSearch}
-          disabled={isSearching}
-          className="px-8 py-6 bg-white/20 hover:bg-white/30 text-white border border-white/20 backdrop-blur-sm"
-        >
-          {isSearching ? 'Searching…' : 'Search'}
-        </Button>
+
+        {!searchTerm && (
+          <div className="flex flex-wrap gap-2 mt-3 justify-center">
+            <span className="text-xs text-white/70">Try searching:</span>
+            {['Chicago', 'New York', '60062', 'Michaels'].map((hint) => (
+              <button
+                key={hint}
+                onClick={() => setSearchTerm(hint)}
+                className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-full text-xs text-white font-medium transition-all duration-200 hover:scale-105"
+              >
+                {hint}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Search Results */}
-      {searchResults.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-lg font-semibold text-white">Found Stores:</h3>
-          {searchResults.map((store) => (
-            <Card key={store.id} className="bg-white/90 backdrop-blur-sm hover:bg-white transition-all">
-              <CardContent className="p-4">
+      {searchTerm.length >= 2 && (searchResults.length > 0 || !isLoading) && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 animate-in slide-in-from-top-2">
+          {searchResults.length > 0 ? (
+            <div className="max-h-96 overflow-y-auto">
+              <div className="sticky top-0 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-3 border-b border-slate-200">
                 <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <h4 
-                      className="font-semibold text-lg cursor-pointer hover:underline"
-                      onClick={() => onStoreClick?.(store)}
-                    >
-                      {store.name}
-                    </h4>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4" />
-                      {store.address}, {store.city}, {store.state} {store.zipCode}
-                    </div>
-                    <div className="text-sm text-vote-primary font-medium mt-1">
-                      {store.votes} votes
-                    </div>
-                  </div>
-                  <Button 
-                    className="bg-gradient-vote"
+                  <span className="text-sm font-semibold text-slate-700">
+                    Found {searchResults.length} store{searchResults.length !== 1 ? 's' : ''}
+                  </span>
+                  <Badge variant="secondary" className="text-xs">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    Sorted by votes
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="divide-y divide-slate-100">
+                {searchResults.map((store, index) => (
+                  <div
+                    key={store.id}
+                    className="p-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 cursor-pointer transition-all duration-200 group"
                     onClick={() => onStoreSelect(store)}
                   >
-                    Vote
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          
-          {/* Add New Store Option */}
-          <Card className="bg-white/70 backdrop-blur-sm hover:bg-white/80 transition-all cursor-pointer border-dashed border-2" onClick={onAddNewStore}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3 text-muted-foreground">
-                <Plus className="h-5 w-5" />
-                <span>Don't see your store? Add it here</span>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          {index < 3 && (
+                            <span className="text-xs font-bold">
+                              {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
+                            </span>
+                          )}
+                          <h4 className="font-semibold text-slate-900 truncate group-hover:text-blue-600 transition-colors">
+                            {store.name}
+                          </h4>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-slate-600 mb-2">
+                          <MapPin className="h-3 w-3 flex-shrink-0" />
+                          <span className="truncate">
+                            {store.city}, {store.state} {store.zipCode}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">
+                            {store.category}
+                          </Badge>
+                          <span className="text-xs text-slate-500">
+                            ⭐ {store.rating.toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                          {store.votes}
+                        </div>
+                        <div className="text-xs text-slate-500">votes</div>
+                        <Button
+                          size="sm"
+                          className="mt-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-xs px-3 py-1 h-auto"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onStoreSelect(store);
+                          }}
+                        >
+                          Vote Now
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
 
-      {/* Empty state messages */}
-      {searchResults.length === 0 && !isSearching && searchTerm && (
-        <div className="text-center text-white/80 space-y-4">
-          <p>No stores found matching "{searchTerm}"</p>
-          <Card className="bg-white/70 backdrop-blur-sm hover:bg-white/80 transition-all cursor-pointer border-dashed border-2 mx-auto max-w-md" onClick={onAddNewStore}>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-center gap-3 text-muted-foreground">
-                <Plus className="h-5 w-5" />
-                <span>Add this store to the directory</span>
+              <div className="border-t border-slate-200 bg-slate-50 p-4">
+                <button
+                  onClick={onAddNewStore}
+                  className="w-full flex items-center justify-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors py-2 px-4 rounded-lg hover:bg-white"
+                >
+                  <Plus className="h-4 w-4" />
+                  Don't see your store? Add it here
+                </button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* No search yet message */}
-      {searchResults.length === 0 && !isSearching && !searchTerm && (
-        <div className="text-center text-white/80">
-          <p>Enter a ZIP code, city, or store name to find stores in your area</p>
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <Store className="h-12 w-12 text-slate-300 mx-auto mb-3" />
+              <p className="text-slate-600 font-medium mb-2">No stores found</p>
+              <p className="text-sm text-slate-500 mb-4">
+                Try a different search term or add your store
+              </p>
+              <Button
+                onClick={onAddNewStore}
+                variant="outline"
+                className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Your Store
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
