@@ -1,128 +1,178 @@
-import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { AuthModal } from '@/components/AuthModal';
-import { AddStoreModal } from '@/components/AddStoreModal';
-import { Home, Building, Info, Award, UserPlus, LogIn } from 'lucide-react';
 import { useState } from 'react';
+import { Trophy, User, LogOut, Menu, X, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AuthModal } from './AuthModal';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
-  user: any;
+  user: { email: string; zipCode: string; isAdmin?: boolean } | null;
   onLogout: () => void;
-  onAuthSuccess?: (user: any) => void;
+  onAuthSuccess: (userData: { email: string; zipCode: string; isAdmin?: boolean }) => void;
 }
 
 export const Header = ({ user, onLogout, onAuthSuccess }: HeaderProps) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showAddStoreModal, setShowAddStoreModal] = useState(false);
-  const location = useLocation();
-
-  const isActive = (path: string) => location.pathname === path;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <>
-      <header className="border-b bg-background sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-                <Award className="w-5 h-5 text-primary-foreground" />
+      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-lg border-b border-slate-200 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            <a href="/" className="flex items-center gap-2 group">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
+                <div className="relative bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg p-2">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
               </div>
-              <span className="font-bold text-lg">Craft Retail Champions</span>
-            </Link>
+              <span className="font-bold text-xl bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent hidden sm:block">
+                Craft Retail Champions
+              </span>
+              <span className="font-bold text-xl bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent sm:hidden">
+                CRC
+              </span>
+            </a>
 
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center space-x-6">
-              <Link 
-                to="/" 
-                className={`flex items-center space-x-1 px-3 py-2 rounded-md transition-colors ${
-                  isActive('/') ? 'bg-muted text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
+            <nav className="hidden md:flex items-center gap-6">
+              <a 
+                href="/about" 
+                className="text-slate-600 hover:text-slate-900 font-medium transition-colors duration-200 hover:underline underline-offset-4"
               >
-                <Home className="w-4 h-4" />
-                <span>Home</span>
-              </Link>
-              
-              <Link 
-                to="/sponsors" 
-                className={`flex items-center space-x-1 px-3 py-2 rounded-md transition-colors ${
-                  isActive('/sponsors') ? 'bg-muted text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
+                About
+              </a>
+              <a 
+                href="/sponsors" 
+                className="text-slate-600 hover:text-slate-900 font-medium transition-colors duration-200 hover:underline underline-offset-4"
               >
-                <Building className="w-4 h-4" />
-                <span>Sponsors</span>
-              </Link>
-
-              <Link 
-                to="/media-kit" 
-                className={`flex items-center space-x-1 px-3 py-2 rounded-md transition-colors ${
-                  isActive('/media-kit') ? 'bg-muted text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
+                Sponsors
+              </a>
+              <a 
+                href="/media-kit" 
+                className="text-slate-600 hover:text-slate-900 font-medium transition-colors duration-200 hover:underline underline-offset-4"
               >
-                <Award className="w-4 h-4" />
-                <span>Media Kit</span>
-              </Link>
-              
-              <Link 
-                to="/about" 
-                className={`flex items-center space-x-1 px-3 py-2 rounded-md transition-colors ${
-                  isActive('/about') ? 'bg-muted text-primary' : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Info className="w-4 h-4" />
-                <span>About</span>
-              </Link>
+                Media Kit
+              </a>
             </nav>
 
-            {/* Actions */}
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowAddStoreModal(true)}
-                className="hidden sm:flex items-center space-x-1"
-              >
-                <UserPlus className="w-4 h-4" />
-                <span>Add Store</span>
-              </Button>
-
+            <div className="flex items-center gap-3">
               {user ? (
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-muted-foreground hidden sm:block">
-                    {user.email}
-                  </span>
-                  <Button variant="outline" size="sm" onClick={onLogout}>
-                    Logout
-                  </Button>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      className="hidden md:flex items-center gap-2 hover:bg-slate-100"
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <User className="h-4 w-4 text-white" />
+                      </div>
+                      <span className="text-sm font-medium text-slate-700">
+                        {user.email.split('@')[0]}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem disabled className="text-xs text-slate-500">
+                      {user.email}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem disabled className="text-xs text-slate-500">
+                      ZIP: {user.zipCode}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={onLogout} className="text-red-600 cursor-pointer">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
-                <Button 
-                  size="sm"
+                <Button
                   onClick={() => setShowAuthModal(true)}
-                  className="flex items-center space-x-1"
+                  className="hidden md:flex bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  <LogIn className="w-4 h-4" />
-                  <span>Login</span>
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Sign In to Vote
                 </Button>
               )}
+
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
+              </Button>
             </div>
           </div>
+
+          {mobileMenuOpen && (
+            <div className="md:hidden py-4 border-t border-slate-200 animate-in slide-in-from-top-2">
+              <nav className="flex flex-col gap-4">
+                <a 
+                  href="/about" 
+                  className="text-slate-600 hover:text-slate-900 font-medium transition-colors px-2 py-1 hover:bg-slate-50 rounded"
+                >
+                  About
+                </a>
+                <a 
+                  href="/sponsors" 
+                  className="text-slate-600 hover:text-slate-900 font-medium transition-colors px-2 py-1 hover:bg-slate-50 rounded"
+                >
+                  Sponsors
+                </a>
+                <a 
+                  href="/media-kit" 
+                  className="text-slate-600 hover:text-slate-900 font-medium transition-colors px-2 py-1 hover:bg-slate-50 rounded"
+                >
+                  Media Kit
+                </a>
+                
+                {user ? (
+                  <div className="pt-4 border-t border-slate-200 space-y-2">
+                    <div className="px-2 py-1 text-sm text-slate-600">
+                      <div className="font-medium">{user.email}</div>
+                      <div className="text-xs">ZIP: {user.zipCode}</div>
+                    </div>
+                    <Button
+                      onClick={onLogout}
+                      variant="ghost"
+                      className="w-full justify-start text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log Out
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => {
+                      setShowAuthModal(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Sign In to Vote
+                  </Button>
+                )}
+              </nav>
+            </div>
+          )}
         </div>
       </header>
 
-      <AuthModal 
-        isOpen={showAuthModal} 
+      <AuthModal
+        isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onAuthSuccess={(user) => {
-          onAuthSuccess?.(user);
-          setShowAuthModal(false);
-        }}
-      />
-      
-      <AddStoreModal 
-        isOpen={showAddStoreModal} 
-        onClose={() => setShowAddStoreModal(false)}
-        user={user}
+        onSuccess={onAuthSuccess}
       />
     </>
   );
