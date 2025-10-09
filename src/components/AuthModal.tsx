@@ -1,236 +1,222 @@
 import { useState } from 'react';
+import { X, Mail, MapPin, Loader2, Lock, Shield, CheckCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { loginSchema, signupSchema } from '@/lib/validation';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAuthSuccess: (user: any) => void;
+  onSuccess: (userData: { email: string; zipCode: string; isAdmin?: boolean }) => void;
 }
 
-export const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
+export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [zipCode, setZipCode] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setStep] = useState<'input' | 'success'>('input');
   const { toast } = useToast();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      // Validate input
-      const validated = loginSchema.parse({ email, password });
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: validated.email,
-        password: validated.password,
-      });
 
-      if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          toast({
-            title: "Login failed",
-            description: "Invalid email or password",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "Login failed",
-            description: error.message,
-            variant: "destructive"
-          });
-        }
-        return;
-      }
-
-      if (data.user) {
-        // Check if user has admin role
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.user.id);
-
-        const isAdmin = roles?.some(r => r.role === 'admin') ?? false;
-
-        toast({
-          title: "Login successful!",
-          description: isAdmin ? "Welcome admin!" : "You can now vote for your favorite stores.",
-        });
-        
-        onAuthSuccess({ 
-          email: data.user.email, 
-          zipCode: data.user.user_metadata?.zip_code || '', 
-          isAdmin 
-        });
-        onClose();
-      }
-    } catch (error: any) {
+    if (!email || !email.includes('@')) {
       toast({
-        title: "Validation error",
-        description: error.errors?.[0]?.message || "Please check your input",
-        variant: "destructive"
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  };
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      // Validate input
-      const validated = signupSchema.parse({ email, password, zipCode });
-      
-      const redirectUrl = `${window.location.origin}/`;
-      
-      const { data, error } = await supabase.auth.signUp({
-        email: validated.email,
-        password: validated.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            zip_code: validated.zipCode,
-          }
-        }
-      });
-
-      if (error) {
-        if (error.message.includes('already registered')) {
-          toast({
-            title: "Account exists",
-            description: "This email is already registered. Please login instead.",
-            variant: "destructive"
-          });
-        } else {
-          toast({
-            title: "Signup failed",
-            description: error.message,
-            variant: "destructive"
-          });
-        }
-        return;
-      }
-
-      if (data.user) {
-        toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
-        });
-        onAuthSuccess({ 
-          email: data.user.email, 
-          zipCode: validated.zipCode, 
-          isAdmin: false 
-        });
-        onClose();
-      }
-    } catch (error: any) {
+    if (!zipCode || zipCode.length < 5) {
       toast({
-        title: "Validation error",
-        description: error.errors?.[0]?.message || "Please check your input",
-        variant: "destructive"
+        title: "Invalid ZIP code",
+        description: "Please enter a valid 5-digit ZIP code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { data: adminData } = await supabase
+        .from('admins')
+        .select('email')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      const userData = {
+        email: email.toLowerCase(),
+        zipCode: zipCode,
+        isAdmin: !!adminData,
+      };
+
+      setStep('success');
+      
+      setTimeout(() => {
+        onSuccess(userData);
+        onClose();
+        
+        setTimeout(() => {
+          setEmail('');
+          setZipCode('');
+          setStep('input');
+        }, 300);
+      }, 1500);
+
+    } catch (error: any) {
+      console.error('Auth error:', error);
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Login to Vote</DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
 
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="login">
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="login-email">Email</Label>
-                <Input
-                  id="login-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl animate-in zoom-in-95 duration-300 overflow-hidden">
+        
+        {step === 'success' ? (
+          <div className="p-12 text-center">
+            <div className="w-20 h-20 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+              <CheckCircle className="h-12 w-12 text-white" />
+            </div>
+            <h3 className="text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              Welcome!
+            </h3>
+            <p className="text-lg text-slate-600">
+              You're all set to start voting!
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="relative bg-gradient-to-r from-blue-500 via-purple-600 to-indigo-600 text-white p-8">
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="h-8 w-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-bold mb-2">Sign In to Vote</h2>
+                <p className="text-white/90">Join thousands of craft enthusiasts!</p>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="login-password">Password</Label>
-                <Input
-                  id="login-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-8 space-y-6">
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-4 border border-blue-100">
+                <div className="flex items-start gap-3 text-sm">
+                  <Shield className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-slate-700">
+                    <p className="font-semibold mb-1">Why sign in?</p>
+                    <ul className="space-y-1 text-xs">
+                      <li>✓ Vote for your favorite stores</li>
+                      <li>✓ Enter to win a $500 shopping spree</li>
+                      <li>✓ Track your voting history</li>
+                      <li>✓ Get exclusive updates</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Logging in...' : 'Login'}
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  Email Address <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="pl-12 h-12 border-2 focus:border-blue-500 rounded-xl"
+                  />
+                </div>
+                <p className="text-xs text-slate-500">
+                  We'll only use this to verify your votes
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-sm font-semibold text-slate-700">
+                  ZIP Code <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <Input
+                    type="text"
+                    placeholder="12345"
+                    value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                    required
+                    maxLength={5}
+                    className="pl-12 h-12 border-2 focus:border-blue-500 rounded-xl"
+                  />
+                </div>
+                <p className="text-xs text-slate-500">
+                  Helps us show you local stores
+                </p>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+                <div className="flex items-start gap-2 text-xs text-slate-600">
+                  <Lock className="h-4 w-4 text-slate-400 flex-shrink-0 mt-0.5" />
+                  <p>
+                    <span className="font-semibold">Your privacy matters.</span> We never share your information. 
+                    By signing in, you agree to our{' '}
+                    <a href="#" className="text-blue-600 hover:underline">Terms</a> and{' '}
+                    <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>.
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Signing In...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-5 w-5 mr-2" />
+                    Sign In & Start Voting
+                  </>
+                )}
               </Button>
-            </form>
-          </TabsContent>
-          
-          <TabsContent value="signup">
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="signup-email">Email</Label>
-                <Input
-                  id="signup-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="signup-password">Password (min 6 characters)</Label>
-                <Input
-                  id="signup-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="zip-code">ZIP Code</Label>
-                <Input
-                  id="zip-code"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
-                  placeholder="12345"
-                  pattern="\d{5}"
-                  required
-                />
-              </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Creating Account...' : 'Create Account'}
-              </Button>
+              <div className="text-center">
+                <p className="text-sm text-slate-600">
+                  🎉 <span className="font-semibold">No password needed!</span> Quick and easy sign-in.
+                </p>
+              </div>
             </form>
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
