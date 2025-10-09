@@ -65,7 +65,7 @@ const MediaKit = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={null} onLogout={() => {}} />
+      <Header user={null} onLogout={() => {}} onAuthSuccess={() => {}} />
       
       {/* Hero Section */}
       <section className="bg-gradient-hero py-16 px-4 text-center text-white">

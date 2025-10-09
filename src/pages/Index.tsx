@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import VoteApp from '@/components/VoteApp';
+import { VoteApp } from '@/components/VoteApp';
 
 const Index = () => {
   useEffect(() => {

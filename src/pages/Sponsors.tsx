@@ -47,7 +47,7 @@ const Sponsors = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={null} onLogout={() => {}} />
+      <Header user={null} onLogout={() => {}} onAuthSuccess={() => {}} />
       <main className="container mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">

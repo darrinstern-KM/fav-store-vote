@@ -27,7 +27,7 @@ const ContactUs = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={null} onLogout={() => {}} />
+      <Header user={null} onLogout={() => {}} onAuthSuccess={() => {}} />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">

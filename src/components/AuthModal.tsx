@@ -44,16 +44,25 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     setIsSubmitting(true);
 
     try {
-      const { data: adminData } = await supabase
-        .from('admins')
-        .select('email')
-        .eq('email', email.toLowerCase())
-        .single();
+      // Check if user has admin role via user_roles table
+      const { data: { session } } = await supabase.auth.getSession();
+      let isAdmin = false;
+      
+      if (session?.user) {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+        
+        isAdmin = !!roleData;
+      }
 
       const userData = {
         email: email.toLowerCase(),
         zipCode: zipCode,
-        isAdmin: !!adminData,
+        isAdmin,
       };
 
       setStep('success');

@@ -49,13 +49,14 @@ export const AddStoreModal = ({ isOpen, onClose, onSuccess }: AddStoreModalProps
       const { error } = await supabase
         .from('stores')
         .insert({
+          ShopID: crypto.randomUUID(),
           shop_name: formData.name,
           shop_addr_1: formData.address,
           shop_city: formData.city,
           shop_state: formData.state,
           shop_zip: formData.zipCode,
           shop_email: formData.email || null,
-          shop_phone: formData.phone || null,
+          shop_phone_1: formData.phone || null,
           shop_hours: formData.hours || null,
           shop_mdse: formData.category || null,
           shop_website: formData.website || null,

@@ -19,11 +19,13 @@ interface Store {
 }
 
 interface NearbyStoresProps {
-  onStoreSelect: (store: Store) => void;
-  onStoreClick: (store: Store) => void;
+  onVoteClick: (store: Store) => void;
+  userZipCode?: string;
 }
 
-export const NearbyStores = ({ onStoreSelect, onStoreClick }: NearbyStoresProps) => {
+export const NearbyStores = ({ onVoteClick, userZipCode }: NearbyStoresProps) => {
+  const onStoreSelect = onVoteClick;
+  const onStoreClick = onVoteClick;
   const { data: topStores = [], isLoading } = useQuery({
     queryKey: ['nearbyStores'],
     queryFn: async () => {

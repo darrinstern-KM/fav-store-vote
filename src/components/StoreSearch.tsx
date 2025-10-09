@@ -21,12 +21,13 @@ interface Store {
 }
 
 interface StoreSearchProps {
-  onStoreSelect: (store: Store) => void;
-  onAddNewStore: () => void;
-  onStoreClick: (store: Store) => void;
+  onVoteClick: (store: Store) => void;
 }
 
-export const StoreSearch = ({ onStoreSelect, onAddNewStore, onStoreClick }: StoreSearchProps) => {
+export const StoreSearch = ({ onVoteClick }: StoreSearchProps) => {
+  const onStoreSelect = onVoteClick;
+  const onAddNewStore = () => {}; // Placeholder
+  const onStoreClick = onVoteClick;
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [isFocused, setIsFocused] = useState(false);

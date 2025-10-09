@@ -51,14 +51,26 @@ export const VoteModal = ({ store, isOpen, onClose, user }: VoteModalProps) => {
     setIsSubmitting(true);
 
     try {
+      // Get the current authenticated user
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      
+      if (!authUser) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to vote.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error: voteError } = await supabase
         .from('votes')
         .insert({
+          user_id: authUser.id,
           store_id: store.id,
-          user_email: user.email,
-          user_zip: user.zipCode,
+          voter_email: user.email,
           rating,
-          testimonial: testimonial.trim() || null,
+          comment: testimonial.trim() || null,
         });
 
       if (voteError) throw voteError;
