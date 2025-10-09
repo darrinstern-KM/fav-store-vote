@@ -98,25 +98,26 @@ const Footer = () => {
           {/* Owned & Managed By */}
           <div>
             <h3 className="font-semibold mb-4">Owned & Managed by</h3>
-            <div className="flex items-center gap-3 mb-4">
-              <img 
-                src="/lovable-uploads/3bd255e3-a72d-40f7-8ed5-1247212390a5.png" 
-                alt="Koelnmesse Logo" 
-                className="h-8"
-              />
-              <div>
-                <p className="text-sm font-medium">Koelnmesse Inc.</p>
-                <p className="text-xs text-muted-foreground">Global Trade Fair Organizer</p>
-              </div>
-            </div>
+            <img 
+              src="https://media.koelnmesse.io/koelnmesse/redaktionell/koelnmesse/img_40/koelnmesse_logo_claim.svg" 
+              alt="Koelnmesse Logo" 
+              className="h-12 mb-6"
+            />
 
             <div>
-              <h4 className="font-medium mb-2 text-sm">Industry Partner</h4>
-              <img 
-                src="/lovable-uploads/d80dca82-3afa-455c-a057-33f1f6967df0.png" 
-                alt="AFCI Logo" 
-                className="h-6"
-              />
+              <h4 className="font-semibold mb-3">Serving the Community</h4>
+              <div className="space-y-3">
+                <img 
+                  src="/lovable-uploads/3bd255e3-a72d-40f7-8ed5-1247212390a5.png" 
+                  alt="h+h americas Logo" 
+                  className="h-8"
+                />
+                <img 
+                  src="/lovable-uploads/d80dca82-3afa-455c-a057-33f1f6967df0.png" 
+                  alt="Fiber+Fabric Craft Festival Logo" 
+                  className="h-8"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -126,7 +127,7 @@ const Footer = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 text-sm text-muted-foreground">
             <div className="space-y-2">
               <p>
-                © Copyright 2024 | Koelnmesse Inc. | All Rights Reserved. The Fiber+Fabric Craft Festival & h+h americas logo is a registered trademark of Koelnmesse Inc.
+                © Copyright 2025 | Koelnmesse Inc. | All Rights Reserved. The Fiber+Fabric Craft Festival & h+h americas logo is a registered trademark of Koelnmesse Inc.
               </p>
             </div>
           </div>
