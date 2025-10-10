@@ -195,7 +195,23 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vote_statistics: {
+        Row: {
+          avg_rating: number | null
+          comment_count: number | null
+          store_id: string | null
+          vote_count: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
+            referencedRelation: "stores"
+            referencedColumns: ["ShopID"]
+          },
+        ]
+      }
     }
     Functions: {
       get_public_stores: {
