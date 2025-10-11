@@ -102,7 +102,7 @@ export const VoteApp = () => {
     setIsVoteModalOpen(true);
   };
 
-  // Show admin panel if user is admin
+  // Show admin panel if user is admin (UI-only check - actual security enforced by RLS)
   if (user?.isAdmin) {
     return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
