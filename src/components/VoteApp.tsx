@@ -6,6 +6,7 @@ import { NearbyStores } from './NearbyStores';
 import { Footer } from './Footer';
 import { AdminPanel } from './AdminPanel';
 import { VoteModal } from './VoteModal';
+import { useGeolocation } from '@/hooks/useGeolocation';
 
 interface Store {
   id: string;
@@ -24,6 +25,7 @@ export const VoteApp = () => {
   const [user, setUser] = useState<User | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [isVoteModalOpen, setIsVoteModalOpen] = useState(false);
+  const userLocation = useGeolocation();
 
   useEffect(() => {
     // Check for existing session
@@ -131,7 +133,14 @@ export const VoteApp = () => {
           </div>
 
           <StoreSearch onVoteClick={handleVoteClick} />
-          <NearbyStores onVoteClick={handleVoteClick} userZipCode={user?.zipCode} />
+          <NearbyStores 
+            onVoteClick={handleVoteClick} 
+            userZipCode={user?.zipCode}
+            userLocation={userLocation.latitude && userLocation.longitude ? {
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude
+            } : null}
+          />
         </div>
       </main>
 

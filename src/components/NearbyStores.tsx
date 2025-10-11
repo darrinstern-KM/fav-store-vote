@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { formatMerchandise } from '@/lib/utils';
+import { calculateDistance, geocodeAddress } from '@/lib/distance';
+import { useState, useEffect } from 'react';
 
 interface Store {
   id: string;
@@ -21,11 +23,17 @@ interface Store {
 interface NearbyStoresProps {
   onVoteClick: (store: Store) => void;
   userZipCode?: string;
+  userLocation?: {
+    latitude: number;
+    longitude: number;
+  } | null;
 }
 
-export const NearbyStores = ({ onVoteClick, userZipCode }: NearbyStoresProps) => {
+export const NearbyStores = ({ onVoteClick, userZipCode, userLocation }: NearbyStoresProps) => {
   const onStoreSelect = onVoteClick;
   const onStoreClick = onVoteClick;
+  const [sortedStores, setSortedStores] = useState<Store[]>([]);
+  
   const { data: topStores = [], isLoading } = useQuery({
     queryKey: ['nearbyStores'],
     queryFn: async () => {
@@ -34,7 +42,7 @@ export const NearbyStores = ({ onVoteClick, userZipCode }: NearbyStoresProps) =>
         .select('*')
         .eq('approved', true)
         .order('votes_count', { ascending: false })
-        .limit(6);
+        .limit(50); // Fetch more stores for distance sorting
 
       if (error) throw error;
 
@@ -51,6 +59,50 @@ export const NearbyStores = ({ onVoteClick, userZipCode }: NearbyStoresProps) =>
       }));
     },
   });
+
+  // Sort stores by distance when user location is available
+  useEffect(() => {
+    if (!topStores || topStores.length === 0) {
+      setSortedStores([]);
+      return;
+    }
+
+    if (!userLocation) {
+      setSortedStores(topStores.slice(0, 6));
+      return;
+    }
+
+    const sortByDistance = async () => {
+      const storesWithDistance = await Promise.all(
+        topStores.map(async (store) => {
+          const coords = await geocodeAddress(
+            store.city || '',
+            store.state || '',
+            store.zipCode || ''
+          );
+          
+          if (coords) {
+            const distance = calculateDistance(
+              userLocation.latitude,
+              userLocation.longitude,
+              coords.lat,
+              coords.lng
+            );
+            return { ...store, distance };
+          }
+          return { ...store, distance: Infinity };
+        })
+      );
+
+      const sorted = storesWithDistance
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 6);
+      
+      setSortedStores(sorted);
+    };
+
+    sortByDistance();
+  }, [topStores, userLocation]);
 
   if (isLoading) {
     return (
@@ -73,8 +125,12 @@ export const NearbyStores = ({ onVoteClick, userZipCode }: NearbyStoresProps) =>
             <Navigation className="h-5 w-5 text-primary-foreground" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-foreground">Trending Stores</h3>
-            <p className="text-sm text-muted-foreground">Vote for your favorites!</p>
+            <h3 className="text-xl font-bold text-foreground">
+              {userLocation ? 'Stores Near You' : 'Trending Stores'}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {userLocation ? 'Based on your location' : 'Vote for your favorites!'}
+            </p>
           </div>
         </div>
         <Badge className="bg-secondary text-secondary-foreground border-border">
@@ -84,7 +140,7 @@ export const NearbyStores = ({ onVoteClick, userZipCode }: NearbyStoresProps) =>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {topStores.map((store, index) => (
+        {sortedStores.map((store, index) => (
           <Card 
             key={store.id}
             className="group bg-card backdrop-blur-lg border border-border hover:bg-accent/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer overflow-hidden"
