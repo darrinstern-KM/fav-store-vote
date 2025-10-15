@@ -4,6 +4,7 @@ import { Star, Award, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 
 interface Sponsor {
   id: string;
@@ -28,6 +29,7 @@ export const SponsorsSection = () => {
     }
   });
 
+  // Don't render anything if no sponsors - but keep this after all hooks
   if (sponsors.length === 0) {
     return null;
   }
@@ -92,10 +94,10 @@ export const SponsorsSection = () => {
           variant="outline"
           className="group"
         >
-          <a href="/sponsors">
+          <Link to="/sponsors">
             Learn More About Our Sponsors
             <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </a>
+          </Link>
         </Button>
       </div>
     </section>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Trophy, User, LogOut, Menu, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AuthModal } from './AuthModal';
+import { Link } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +25,7 @@ export const Header = ({ user, onLogout, onAuthSuccess }: HeaderProps) => {
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-lg border-b border-slate-200 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
-            <a href="/" className="flex items-center gap-2 group">
+            <Link to="/" className="flex items-center gap-2 group">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg blur opacity-75 group-hover:opacity-100 transition-opacity"></div>
                 <div className="relative bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg p-2">
@@ -37,27 +38,27 @@ export const Header = ({ user, onLogout, onAuthSuccess }: HeaderProps) => {
               <span className="font-bold text-xl bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent sm:hidden">
                 CRC
               </span>
-            </a>
+            </Link>
 
             <nav className="hidden md:flex items-center gap-6">
-              <a 
-                href="/about" 
+              <Link 
+                to="/about" 
                 className="text-slate-600 hover:text-slate-900 font-medium transition-colors duration-200 hover:underline underline-offset-4"
               >
                 About
-              </a>
-              <a 
-                href="/sponsors" 
+              </Link>
+              <Link 
+                to="/sponsors" 
                 className="text-slate-600 hover:text-slate-900 font-medium transition-colors duration-200 hover:underline underline-offset-4"
               >
                 Sponsors
-              </a>
-              <a 
-                href="/media-kit" 
+              </Link>
+              <Link 
+                to="/media-kit" 
                 className="text-slate-600 hover:text-slate-900 font-medium transition-colors duration-200 hover:underline underline-offset-4"
               >
                 Media Kit
-              </a>
+              </Link>
             </nav>
 
             <div className="flex items-center gap-3">
@@ -117,24 +118,24 @@ export const Header = ({ user, onLogout, onAuthSuccess }: HeaderProps) => {
           {mobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-slate-200 animate-in slide-in-from-top-2">
               <nav className="flex flex-col gap-4">
-                <a 
-                  href="/about" 
+                <Link 
+                  to="/about" 
                   className="text-slate-600 hover:text-slate-900 font-medium transition-colors px-2 py-1 hover:bg-slate-50 rounded"
                 >
                   About
-                </a>
-                <a 
-                  href="/sponsors" 
+                </Link>
+                <Link 
+                  to="/sponsors" 
                   className="text-slate-600 hover:text-slate-900 font-medium transition-colors px-2 py-1 hover:bg-slate-50 rounded"
                 >
                   Sponsors
-                </a>
-                <a 
-                  href="/media-kit" 
+                </Link>
+                <Link 
+                  to="/media-kit" 
                   className="text-slate-600 hover:text-slate-900 font-medium transition-colors px-2 py-1 hover:bg-slate-50 rounded"
                 >
                   Media Kit
-                </a>
+                </Link>
                 
                 {user ? (
                   <div className="pt-4 border-t border-slate-200 space-y-2">
