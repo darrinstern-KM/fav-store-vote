@@ -6,6 +6,7 @@ import { NearbyStores } from './NearbyStores';
 import { Footer } from './Footer';
 import { AdminPanel } from './AdminPanel';
 import { VoteModal } from './VoteModal';
+import { SponsorsSection } from './SponsorsSection';
 import { useGeolocation } from '@/hooks/useGeolocation';
 
 interface Store {
@@ -141,6 +142,7 @@ export const VoteApp = () => {
               longitude: userLocation.longitude
             } : null}
           />
+          <SponsorsSection />
         </div>
       </main>
 
