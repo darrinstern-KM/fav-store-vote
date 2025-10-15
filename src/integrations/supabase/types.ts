@@ -188,6 +188,13 @@ export type Database = {
             foreignKeyName: "votes_store_id_fkey"
             columns: ["store_id"]
             isOneToOne: false
+            referencedRelation: "public_stores"
+            referencedColumns: ["ShopID"]
+          },
+          {
+            foreignKeyName: "votes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
             referencedRelation: "stores"
             referencedColumns: ["ShopID"]
           },
@@ -195,6 +202,60 @@ export type Database = {
       }
     }
     Views: {
+      public_stores: {
+        Row: {
+          approved: boolean | null
+          created_at: string | null
+          rating: number | null
+          shop_addr_1: string | null
+          shop_addr_2: string | null
+          shop_city: string | null
+          shop_hours: string | null
+          shop_mdse: string | null
+          shop_name: string | null
+          shop_state: string | null
+          shop_website: string | null
+          shop_zip: string | null
+          ShopID: string | null
+          updated_at: string | null
+          votes_count: number | null
+        }
+        Insert: {
+          approved?: boolean | null
+          created_at?: string | null
+          rating?: number | null
+          shop_addr_1?: string | null
+          shop_addr_2?: string | null
+          shop_city?: string | null
+          shop_hours?: string | null
+          shop_mdse?: string | null
+          shop_name?: string | null
+          shop_state?: string | null
+          shop_website?: string | null
+          shop_zip?: string | null
+          ShopID?: string | null
+          updated_at?: string | null
+          votes_count?: number | null
+        }
+        Update: {
+          approved?: boolean | null
+          created_at?: string | null
+          rating?: number | null
+          shop_addr_1?: string | null
+          shop_addr_2?: string | null
+          shop_city?: string | null
+          shop_hours?: string | null
+          shop_mdse?: string | null
+          shop_name?: string | null
+          shop_state?: string | null
+          shop_website?: string | null
+          shop_zip?: string | null
+          ShopID?: string | null
+          updated_at?: string | null
+          votes_count?: number | null
+        }
+        Relationships: []
+      }
       vote_statistics: {
         Row: {
           avg_rating: number | null
@@ -207,6 +268,13 @@ export type Database = {
             foreignKeyName: "votes_store_id_fkey"
             columns: ["store_id"]
             isOneToOne: false
+            referencedRelation: "public_stores"
+            referencedColumns: ["ShopID"]
+          },
+          {
+            foreignKeyName: "votes_store_id_fkey"
+            columns: ["store_id"]
+            isOneToOne: false
             referencedRelation: "stores"
             referencedColumns: ["ShopID"]
           },
@@ -214,26 +282,6 @@ export type Database = {
       }
     }
     Functions: {
-      get_public_stores: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          approved: boolean
-          created_at: string
-          rating: number
-          shop_addr_1: string
-          shop_addr_2: string
-          shop_city: string
-          shop_hours: string
-          shop_mdse: string
-          shop_name: string
-          shop_state: string
-          shop_website: string
-          shop_zip: string
-          shopid: string
-          updated_at: string
-          votes_count: number
-        }[]
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
