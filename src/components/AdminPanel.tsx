@@ -1,10 +1,11 @@
-import { Check, X, Store, Users, MessageSquare, Upload } from 'lucide-react';
+import { Check, X, Store, Users, MessageSquare, Upload, Award } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { ExcelImport } from './ExcelImport';
+import { SponsorManagement } from './SponsorManagement';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -131,6 +132,10 @@ export const AdminPanel = () => {
             <Store className="h-4 w-4 mr-2" />
             Pending Stores ({pendingStores.length})
           </TabsTrigger>
+          <TabsTrigger value="sponsors">
+            <Award className="h-4 w-4 mr-2" />
+            Sponsors
+          </TabsTrigger>
           <TabsTrigger value="import">
             <Upload className="h-4 w-4 mr-2" />
             Excel Import
@@ -200,6 +205,10 @@ export const AdminPanel = () => {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="sponsors">
+          <SponsorManagement />
         </TabsContent>
 
         <TabsContent value="import">

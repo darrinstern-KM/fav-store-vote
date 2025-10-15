@@ -2,22 +2,35 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, Award, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Sponsor {
+  id: string;
+  name: string;
+  type: string;
+  logo_url: string | null;
+  tier: string;
+}
 
 export const SponsorsSection = () => {
-  const sponsors = [
-    {
-      name: "h+h americas",
-      type: "Title Sponsor",
-      logo: "/lovable-uploads/3bd255e3-a72d-40f7-8ed5-1247212390a5.png",
-      tier: "title"
-    },
-    {
-      name: "Fiber+Fabric Craft Festival",
-      type: "Presenting Sponsor",
-      logo: "/lovable-uploads/d80dca82-3afa-455c-a057-33f1f6967df0.png",
-      tier: "presenting"
+  const { data: sponsors = [] } = useQuery({
+    queryKey: ['sponsors'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sponsors')
+        .select('id, name, type, logo_url, tier')
+        .eq('active', true)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      return data as Sponsor[];
     }
-  ];
+  });
+
+  if (sponsors.length === 0) {
+    return null;
+  }
 
   return (
     <section className="py-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -41,11 +54,13 @@ export const SponsorsSection = () => {
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="relative">
                   <div className="w-32 h-32 bg-white rounded-lg shadow-sm flex items-center justify-center p-4">
-                    <img 
-                      src={sponsor.logo} 
-                      alt={`${sponsor.name} logo`}
-                      className="w-full h-full object-contain"
-                    />
+                    {sponsor.logo_url && (
+                      <img 
+                        src={sponsor.logo_url} 
+                        alt={`${sponsor.name} logo`}
+                        className="w-full h-full object-contain"
+                      />
+                    )}
                   </div>
                   {sponsor.tier === 'title' && (
                     <div className="absolute -top-2 -right-2">

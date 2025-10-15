@@ -38,6 +38,48 @@ export type Database = {
         }
         Relationships: []
       }
+      sponsors: {
+        Row: {
+          active: boolean | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          logo_url: string | null
+          name: string
+          tier: string
+          type: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          tier: string
+          type: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          tier?: string
+          type?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       stores: {
         Row: {
           approved: boolean | null

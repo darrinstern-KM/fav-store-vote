@@ -4,11 +4,23 @@ import { Footer } from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink, Award, Star } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Sponsor {
+  id: string;
+  name: string;
+  type: string;
+  description: string | null;
+  website: string | null;
+  logo_url: string | null;
+  tier: string;
+}
 
 const Sponsors = () => {
   useEffect(() => {
     document.title = 'Sponsors – Craft Retail Champions';
-    const desc = 'Meet our sponsors supporting the Craft Retail Champions contest. h+h americas and Fiber+Fabric Craft Festival.';
+    const desc = 'Meet our sponsors supporting the Craft Retail Champions contest.';
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     if (!meta) {
       meta = document.createElement('meta');
@@ -26,24 +38,19 @@ const Sponsors = () => {
     canonical.href = window.location.origin + '/sponsors';
   }, []);
 
-  const sponsors = [
-    {
-      name: "h+h americas",
-      type: "Title Sponsor",
-      description: "Leading trade fair organizer for the international handicraft and hobby industry. h+h americas brings together creative communities and innovative businesses.",
-      website: "https://www.hh-americas.com",
-      logo: "/lovable-uploads/3bd255e3-a72d-40f7-8ed5-1247212390a5.png",
-      tier: "title"
-    },
-    {
-      name: "Fiber+Fabric Craft Festival",
-      type: "Presenting Sponsor",
-      description: "Premier craft festival celebrating fiber arts, quilting, and fabric crafts. Connecting makers with inspiration and quality materials.",
-      website: "https://www.fiberfabric.com",
-      logo: "/lovable-uploads/d80dca82-3afa-455c-a057-33f1f6967df0.png", 
-      tier: "presenting"
+  const { data: sponsors = [], isLoading } = useQuery({
+    queryKey: ['sponsors'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('sponsors')
+        .select('*')
+        .eq('active', true)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      return data as Sponsor[];
     }
-  ];
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,18 +72,25 @@ const Sponsors = () => {
         </div>
 
         {/* Sponsors Grid */}
-        <div className="grid gap-8 md:gap-12 max-w-4xl mx-auto">
-          {sponsors.map((sponsor) => (
+        {isLoading ? (
+          <p className="text-center text-muted-foreground py-8">Loading sponsors...</p>
+        ) : sponsors.length === 0 ? (
+          <p className="text-center text-muted-foreground py-8">No sponsors to display</p>
+        ) : (
+          <div className="grid gap-8 md:gap-12 max-w-4xl mx-auto">
+            {sponsors.map((sponsor) => (
             <Card key={sponsor.name} className="overflow-hidden">
               <CardContent className="p-8">
                 <div className="flex flex-col lg:flex-row items-center gap-8">
                   {/* Logo */}
                   <div className="flex-shrink-0">
-                    <img 
-                      src={sponsor.logo} 
-                      alt={`${sponsor.name} logo`}
-                      className="w-32 h-32 object-contain rounded-lg bg-muted p-4"
-                    />
+                    {sponsor.logo_url && (
+                      <img 
+                        src={sponsor.logo_url} 
+                        alt={`${sponsor.name} logo`}
+                        className="w-32 h-32 object-contain rounded-lg bg-muted p-4"
+                      />
+                    )}
                   </div>
 
                   {/* Content */}
@@ -96,25 +110,30 @@ const Sponsors = () => {
                       )}
                     </div>
                     
-                    <p className="text-muted-foreground mb-6 leading-relaxed">
-                      {sponsor.description}
-                    </p>
+                    {sponsor.description && (
+                      <p className="text-muted-foreground mb-6 leading-relaxed">
+                        {sponsor.description}
+                      </p>
+                    )}
 
-                    <a 
-                      href={sponsor.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors"
-                    >
-                      <span>Visit Website</span>
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
+                    {sponsor.website && (
+                      <a 
+                        href={sponsor.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center space-x-2 text-primary hover:text-primary/80 transition-colors"
+                      >
+                        <span>Visit Website</span>
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    )}
                   </div>
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Call to Action */}
         <div className="text-center mt-16 p-8 bg-muted/50 rounded-lg">
