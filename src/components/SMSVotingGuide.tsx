@@ -2,6 +2,7 @@ import { MessageSquare, Send, Smartphone, CheckCircle, Zap, ArrowRight } from 'l
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { FaWhatsapp } from 'react-icons/fa';
 
 export const SMSVotingGuide = () => {
   const steps = [
@@ -153,7 +154,7 @@ export const SMSVotingGuide = () => {
           </CardContent>
         </Card>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
           <Card className="border-2 border-purple-200 hover:shadow-xl transition-all duration-300 group">
             <CardHeader className="bg-gradient-to-br from-purple-50 to-pink-50">
               <div className="flex items-center gap-3 mb-2">
@@ -170,6 +171,29 @@ export const SMSVotingGuide = () => {
               <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white font-semibold">
                 <MessageSquare className="h-4 w-4 mr-2" />
                 Text Now: (555) 123-4567
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 border-green-200 hover:shadow-xl transition-all duration-300 group">
+            <CardHeader className="bg-gradient-to-br from-green-50 to-emerald-50">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <FaWhatsapp className="h-6 w-6 text-white" />
+                </div>
+                <CardTitle className="text-lg">Vote by WhatsApp</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <p className="text-slate-600 mb-4 text-sm">
+                Use your favorite messaging app to vote
+              </p>
+              <Button 
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold"
+                onClick={() => window.open('https://wa.me/15551234567?text=VOTE%20', '_blank')}
+              >
+                <FaWhatsapp className="h-5 w-5 mr-2" />
+                Chat on WhatsApp
               </Button>
             </CardContent>
           </Card>

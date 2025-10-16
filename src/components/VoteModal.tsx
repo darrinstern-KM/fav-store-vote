@@ -71,6 +71,7 @@ export const VoteModal = ({ store, isOpen, onClose, user }: VoteModalProps) => {
           voter_email: user.email,
           rating,
           comment: testimonial.trim() || null,
+          voting_method: 'web',
         });
 
       if (voteError) throw voteError;
