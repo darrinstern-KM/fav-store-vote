@@ -30,62 +30,62 @@ export const VoteApp = () => {
   const userLocation = useGeolocation();
 
   useEffect(() => {
-    // Check for existing session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        // Get user profile
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('email, zip_code')
-          .eq('id', session.user.id)
-          .single();
+        // Defer profile fetching to avoid blocking auth state changes
+        setTimeout(async () => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, zip_code')
+            .eq('id', session.user.id)
+            .single();
 
-        // Check if user is admin
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .eq('role', 'admin')
+            .maybeSingle();
 
-        if (profile) {
-          setUser({
-            email: profile.email || session.user.email || '',
-            zipCode: profile.zip_code || '',
-            isAdmin: !!roleData
-          });
-        }
-      }
-    };
-
-    checkSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('email, zip_code')
-          .eq('id', session.user.id)
-          .single();
-
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
-
-        if (profile) {
-          setUser({
-            email: profile.email || session.user.email || '',
-            zipCode: profile.zip_code || '',
-            isAdmin: !!roleData
-          });
-        }
+          if (profile) {
+            setUser({
+              email: profile.email || session.user.email || '',
+              zipCode: profile.zip_code || '',
+              isAdmin: !!roleData
+            });
+          }
+        }, 0);
       } else {
         setUser(null);
+      }
+    });
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setTimeout(async () => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email, zip_code')
+            .eq('id', session.user.id)
+            .single();
+
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .eq('role', 'admin')
+            .maybeSingle();
+
+          if (profile) {
+            setUser({
+              email: profile.email || session.user.email || '',
+              zipCode: profile.zip_code || '',
+              isAdmin: !!roleData
+            });
+          }
+        }, 0);
       }
     });
 

@@ -13,9 +13,11 @@ interface AuthModalProps {
 
 export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<'input' | 'success'>('input');
+  const [mode, setMode] = useState<'signin' | 'signup'>('signup');
   const { toast } = useToast();
 
   if (!isOpen) return null;
@@ -32,7 +34,16 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
       return;
     }
 
-    if (!zipCode || zipCode.length < 5) {
+    if (!password || password.length < 6) {
+      toast({
+        title: "Invalid password",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (mode === 'signup' && (!zipCode || zipCode.length < 5)) {
       toast({
         title: "Invalid ZIP code",
         description: "Please enter a valid 5-digit ZIP code.",
@@ -44,45 +55,109 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
     setIsSubmitting(true);
 
     try {
-      // Check if user has admin role via user_roles table
-      const { data: { session } } = await supabase.auth.getSession();
-      let isAdmin = false;
-      
-      if (session?.user) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
-        
-        isAdmin = !!roleData;
+      if (mode === 'signup') {
+        // Sign up new user
+        const { data, error } = await supabase.auth.signUp({
+          email: email.toLowerCase(),
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              zip_code: zipCode
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        if (data.user) {
+          toast({
+            title: "Account created!",
+            description: "Please check your email to verify your account.",
+          });
+          
+          setStep('success');
+          
+          setTimeout(() => {
+            // Fetch user data after successful signup
+            const userData = {
+              email: email.toLowerCase(),
+              zipCode: zipCode,
+              isAdmin: false
+            };
+            onSuccess(userData);
+            onClose();
+            
+            setTimeout(() => {
+              setEmail('');
+              setPassword('');
+              setZipCode('');
+              setStep('input');
+            }, 300);
+          }, 1500);
+        }
+      } else {
+        // Sign in existing user
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email.toLowerCase(),
+          password
+        });
+
+        if (error) throw error;
+
+        if (data.user) {
+          // Check if user has admin role
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', data.user.id)
+            .eq('role', 'admin')
+            .maybeSingle();
+
+          // Get profile data
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('zip_code')
+            .eq('id', data.user.id)
+            .single();
+
+          const userData = {
+            email: data.user.email || email.toLowerCase(),
+            zipCode: profile?.zip_code || '',
+            isAdmin: !!roleData
+          };
+
+          setStep('success');
+          
+          setTimeout(() => {
+            onSuccess(userData);
+            onClose();
+            
+            setTimeout(() => {
+              setEmail('');
+              setPassword('');
+              setZipCode('');
+              setStep('input');
+            }, 300);
+          }, 1500);
+        }
       }
-
-      const userData = {
-        email: email.toLowerCase(),
-        zipCode: zipCode,
-        isAdmin,
-      };
-
-      setStep('success');
-      
-      setTimeout(() => {
-        onSuccess(userData);
-        onClose();
-        
-        setTimeout(() => {
-          setEmail('');
-          setZipCode('');
-          setStep('input');
-        }, 300);
-      }, 1500);
-
     } catch (error: any) {
       console.error('Auth error:', error);
+      
+      let errorMessage = "Something went wrong. Please try again.";
+      
+      if (error.message?.includes('Invalid login credentials')) {
+        errorMessage = "Invalid email or password.";
+      } else if (error.message?.includes('Email not confirmed')) {
+        errorMessage = "Please verify your email before signing in.";
+      } else if (error.message?.includes('User already registered')) {
+        errorMessage = "This email is already registered. Try signing in instead.";
+      }
+      
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -125,8 +200,12 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="h-8 w-8 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold mb-2">Sign In to Vote</h2>
-                <p className="text-white/90">Join thousands of craft enthusiasts!</p>
+                <h2 className="text-3xl font-bold mb-2">
+                  {mode === 'signup' ? 'Create Account' : 'Sign In to Vote'}
+                </h2>
+                <p className="text-white/90">
+                  {mode === 'signup' ? 'Join thousands of craft enthusiasts!' : 'Welcome back!'}
+                </p>
               </div>
             </div>
 
@@ -168,24 +247,47 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
 
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-slate-700">
-                  ZIP Code <span className="text-red-500">*</span>
+                  Password <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                   <Input
-                    type="text"
-                    placeholder="12345"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     required
-                    maxLength={5}
+                    minLength={6}
                     className="pl-12 h-12 border-2 focus:border-blue-500 rounded-xl"
                   />
                 </div>
                 <p className="text-xs text-slate-500">
-                  Helps us show you local stores
+                  {mode === 'signup' ? 'At least 6 characters' : 'Enter your password'}
                 </p>
               </div>
+
+              {mode === 'signup' && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700">
+                    ZIP Code <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                    <Input
+                      type="text"
+                      placeholder="12345"
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
+                      required={mode === 'signup'}
+                      maxLength={5}
+                      className="pl-12 h-12 border-2 focus:border-blue-500 rounded-xl"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500">
+                    Helps us show you local stores
+                  </p>
+                </div>
+              )}
 
               <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
                 <div className="flex items-start gap-2 text-xs text-slate-600">
@@ -207,20 +309,26 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }: AuthModalProps) => {
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                    Signing In...
+                    {mode === 'signup' ? 'Creating Account...' : 'Signing In...'}
                   </>
                 ) : (
                   <>
                     <Sparkles className="h-5 w-5 mr-2" />
-                    Sign In & Start Voting
+                    {mode === 'signup' ? 'Create Account & Start Voting' : 'Sign In & Start Voting'}
                   </>
                 )}
               </Button>
 
               <div className="text-center">
-                <p className="text-sm text-slate-600">
-                  🎉 <span className="font-semibold">No password needed!</span> Quick and easy sign-in.
-                </p>
+                <button
+                  type="button"
+                  onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-semibold"
+                >
+                  {mode === 'signup' 
+                    ? 'Already have an account? Sign in' 
+                    : "Don't have an account? Sign up"}
+                </button>
               </div>
             </form>
           </>
