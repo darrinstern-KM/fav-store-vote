@@ -45,9 +45,8 @@ export const StoreSearch = ({ onVoteClick }: StoreSearchProps) => {
       if (!debouncedSearch || debouncedSearch.length < 2) return [];
       
       const { data, error } = await supabase
-        .from('stores')
+        .from('stores_public')
         .select('ShopID, shop_name, shop_addr_1, shop_addr_2, shop_city, shop_state, shop_zip, shop_website, shop_hours, shop_mdse, approved, votes_count, rating, created_at, updated_at')
-        .eq('approved', true)
         .or(`shop_name.ilike.%${debouncedSearch}%,shop_city.ilike.%${debouncedSearch}%,shop_state.ilike.%${debouncedSearch}%,shop_zip.ilike.%${debouncedSearch}%`)
         .order('votes_count', { ascending: false })
         .limit(10);
