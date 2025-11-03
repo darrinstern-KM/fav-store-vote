@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.54.0';
+import { createHmac } from 'https://deno.land/std@0.177.0/node/crypto.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +10,38 @@ interface TwilioWebhookPayload {
   From: string;
   Body: string;
   MessageSid: string;
+}
+
+// Verify Twilio webhook signature
+function validateTwilioSignature(signature: string, url: string, params: Record<string, string>): boolean {
+  const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
+  if (!authToken) {
+    console.error('TWILIO_AUTH_TOKEN not configured');
+    return false;
+  }
+
+  const data = Object.keys(params)
+    .sort()
+    .map(key => `${key}${params[key]}`)
+    .join('');
+
+  const expected = createHmac('sha1', authToken)
+    .update(url + data)
+    .digest('base64');
+
+  return signature === expected;
+}
+
+// Create deterministic user ID from phone number
+async function createDeterministicUserId(phoneNumber: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(phoneNumber);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  
+  // Convert first 32 characters of hex to UUID format
+  return `${hashHex.slice(0, 8)}-${hashHex.slice(8, 12)}-${hashHex.slice(12, 16)}-${hashHex.slice(16, 20)}-${hashHex.slice(20, 32)}`;
 }
 
 Deno.serve(async (req) => {
@@ -24,6 +57,26 @@ Deno.serve(async (req) => {
     const from = formData.get('From') as string;
     const body = formData.get('Body') as string;
     const messageSid = formData.get('MessageSid') as string;
+    const twilioSignature = req.headers.get('X-Twilio-Signature') || '';
+
+    // Build params object for signature verification
+    const params: Record<string, string> = {};
+    for (const [key, value] of formData.entries()) {
+      params[key] = value as string;
+    }
+
+    // Verify Twilio signature
+    const url = req.url;
+    if (!validateTwilioSignature(twilioSignature, url, params)) {
+      console.error('Invalid Twilio signature - possible fake request');
+      return new Response(
+        `<?xml version="1.0" encoding="UTF-8"?><Response><Message>Unauthorized</Message></Response>`,
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'text/xml' }
+        }
+      );
+    }
 
     console.log('SMS from:', from, 'Body:', body, 'MessageSid:', messageSid);
 
@@ -117,14 +170,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create a temporary user ID based on phone number for tracking
-    const tempUserId = crypto.randomUUID();
+    // Create deterministic user ID from phone number
+    const userId = await createDeterministicUserId(from);
 
     // Record the vote
     const { error: voteError } = await supabase
       .from('votes')
       .insert({
-        user_id: tempUserId,
+        user_id: userId,
         store_id: store.ShopID,
         voter_phone: from,
         rating: 5,
