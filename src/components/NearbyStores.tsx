@@ -34,14 +34,41 @@ export const NearbyStores = ({ onVoteClick, userZipCode, userLocation }: NearbyS
   const onStoreClick = onVoteClick;
   const [sortedStores, setSortedStores] = useState<Store[]>([]);
   
+  // Reverse geocode user location to get state for better filtering
+  const [userState, setUserState] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (userLocation) {
+      // Reverse geocode to get state
+      fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userLocation.latitude}&lon=${userLocation.longitude}`,
+        { headers: { 'User-Agent': 'CraftRetailChampions/1.0' } }
+      )
+        .then(res => res.json())
+        .then(data => {
+          if (data.address?.state) {
+            setUserState(data.address.state);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [userLocation]);
+
   const { data: topStores = [], isLoading } = useQuery({
-    queryKey: ['nearbyStores'],
+    queryKey: ['nearbyStores', userState],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('stores_public')
-        .select('ShopID, shop_name, shop_addr_1, shop_addr_2, shop_city, shop_state, shop_zip, shop_website, shop_hours, shop_mdse, approved, votes_count, rating, created_at, updated_at')
+        .select('ShopID, shop_name, shop_addr_1, shop_addr_2, shop_city, shop_state, shop_zip, shop_website, shop_hours, shop_mdse, approved, votes_count, rating, created_at, updated_at');
+
+      // If we have the user's state, fetch stores from that state first
+      if (userState) {
+        query = query.ilike('shop_state', `%${userState}%`);
+      }
+      
+      const { data, error } = await query
         .order('votes_count', { ascending: false })
-        .limit(50); // Fetch more stores for distance sorting
+        .limit(100); // Fetch more stores for better distance sorting
 
       if (error) throw error;
 
