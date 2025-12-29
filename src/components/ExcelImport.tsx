@@ -1,11 +1,12 @@
 import { useState, useRef } from 'react';
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download } from 'lucide-react';
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ImportBatch {
   id: string;
@@ -19,9 +20,19 @@ interface ImportBatch {
 }
 
 interface ImportError {
-  row_number: number;
-  row_data: any;
-  error_message: string;
+  shopId: string;
+  error: string;
+}
+
+interface ImportResult {
+  success: boolean;
+  summary: {
+    totalParsed: number;
+    inserted: number;
+    updated: number;
+    errors: number;
+  };
+  errors: ImportError[];
 }
 
 export const ExcelImport = () => {
@@ -29,6 +40,7 @@ export const ExcelImport = () => {
   const [importBatches, setImportBatches] = useState<ImportBatch[]>([]);
   const [selectedBatchErrors, setSelectedBatchErrors] = useState<ImportError[]>([]);
   const [showErrors, setShowErrors] = useState(false);
+  const [lastResult, setLastResult] = useState<ImportResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -47,36 +59,71 @@ export const ExcelImport = () => {
     }
 
     setIsUploading(true);
+    setLastResult(null);
 
     try {
-      // Since Supabase is connected, you can implement the actual import logic here
-      // For now, this is a placeholder that demonstrates the UI
+      // Read the file content
+      const csvData = await file.text();
       
-      // Simulate processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Get the current session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in as an admin to import stores",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      toast({
-        title: "Upload successful!",
-        description: `Started processing ${file.name}. File upload functionality ready - implement with Supabase Edge Functions.`
-      });
+      // Call the edge function
+      const response = await fetch(
+        'https://rsndsydjbcqlmkjkrosj.supabase.co/functions/v1/import-stores',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ csvData }),
+        }
+      );
 
-      // Add a demo batch to show the UI
-      const demoBatch: ImportBatch = {
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Import failed');
+      }
+
+      setLastResult(result);
+
+      // Add to import history
+      const batch: ImportBatch = {
         id: Math.random().toString(),
         filename: file.name,
-        total_rows: 100,
-        successful_imports: 95,
-        failed_imports: 5,
-        import_status: 'completed',
+        total_rows: result.summary.totalParsed,
+        successful_imports: result.summary.inserted + result.summary.updated,
+        failed_imports: result.summary.errors,
+        import_status: result.summary.errors > 0 ? 'completed' : 'completed',
         created_at: new Date().toISOString()
       };
       
-      setImportBatches(prev => [demoBatch, ...prev]);
+      setImportBatches(prev => [batch, ...prev]);
+
+      if (result.errors?.length > 0) {
+        setSelectedBatchErrors(result.errors);
+      }
+
+      toast({
+        title: "Import completed!",
+        description: `Inserted: ${result.summary.inserted}, Updated: ${result.summary.updated}, Errors: ${result.summary.errors}`
+      });
 
     } catch (error: any) {
       console.error('Upload error:', error);
       toast({
-        title: "Upload failed",
+        title: "Import failed",
         description: error.message || "Failed to upload and process file",
         variant: "destructive"
       });
@@ -88,63 +135,50 @@ export const ExcelImport = () => {
     }
   };
 
-  const fetchImportBatches = async () => {
-    // Placeholder for Supabase integration
-    // When implementing, use: supabase.from('store_import_batches').select('*')
-    console.log('Fetching import batches from Supabase...');
-  };
-
-  const fetchBatchErrors = async (batchId: string) => {
-    // Demo errors for UI demonstration
-    const demoErrors: ImportError[] = [
-      {
-        row_number: 3,
-        row_data: { name: "Test Store", address: "", city: "Springfield" },
-        error_message: "Address field is required"
-      },
-      {
-        row_number: 7,
-        row_data: { name: "", address: "123 Main St", city: "Springfield" },
-        error_message: "Store name is required"
-      }
-    ];
-    
-    setSelectedBatchErrors(demoErrors);
-    setShowErrors(true);
-  };
-
   const downloadTemplate = () => {
-    // Create CSV template with required columns
+    // Create CSV template matching the expected format
     const headers = [
-      'shop_id',
-      'name',
-      'address', 
-      'city',
-      'state',
-      'zip_code',
-      'category',
+      'shop_num_1',
+      'shop_name',
+      'shop_addr_1',
+      'shop_addr_2',
+      'shop_city',
+      'shop_state',
+      'shop_zip',
+      'shop_addr_1_m',
+      'shop_addr_2_m',
+      'shop_city_m',
+      'shop_state_m',
+      'shop_zip_m',
+      'shop_phone_1',
+      'shop_phone_2',
       'shop_email',
+      'shop_website',
       'shop_owner',
       'shop_hours',
-      'phone',
-      'website',
-      'description'
+      'shop_mdse'
     ];
     
     const sampleData = [
-      'SHOP001',
-      'Downtown Electronics',
-      '123 Main St',
+      '12345',
+      'Sample Craft Store',
+      '123 Main Street',
+      'Suite A',
       'Springfield',
       'IL',
       '62701',
-      'Electronics',
-      'contact@downtown-electronics.com',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '(555) 123-4567',
+      '',
+      'contact@samplestore.com',
+      'https://samplestore.com',
       'John Smith',
-      'Mon-Fri 9AM-7PM, Sat 10AM-6PM',
-      '555-123-4567',
-      'https://downtown-electronics.com',
-      'Your local electronics store with the best prices and service'
+      'Mon-Fri 9-5, Sat 10-4',
+      'C'
     ];
 
     const csvContent = [
@@ -174,26 +208,22 @@ export const ExcelImport = () => {
     }
   };
 
-  // Load import batches on component mount
-  // useState(() => {
-  //   fetchImportBatches();
-  // });
-
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileSpreadsheet className="h-5 w-5" />
-            Excel/CSV Store Import
+            CSV Store Import
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-            <Alert>
+          <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Upload an Excel or CSV file with store data. Required columns: shop_id, name, address, city, state, zip_code, category. 
-              Optional columns: shop_email, shop_owner, shop_hours, phone, website, description. Implement with Supabase Edge Functions for full functionality.
+              Upload a CSV file with store data. Required columns: <strong>shop_num_1</strong> (unique ID), <strong>shop_name</strong>. 
+              Optional: shop_addr_1, shop_addr_2, shop_city, shop_state, shop_zip, shop_phone_1, shop_phone_2, shop_email, shop_website, shop_owner, shop_hours, shop_mdse.
+              Existing stores will be updated, new stores will be added as approved.
             </AlertDescription>
           </Alert>
 
@@ -211,7 +241,7 @@ export const ExcelImport = () => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".xlsx,.xls,.csv"
+                accept=".csv"
                 onChange={handleFileUpload}
                 className="hidden"
               />
@@ -220,11 +250,48 @@ export const ExcelImport = () => {
                 disabled={isUploading}
                 className="flex items-center gap-2"
               >
-                <Upload className="h-4 w-4" />
-                {isUploading ? 'Uploading...' : 'Upload File'}
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4" />
+                    Upload CSV
+                  </>
+                )}
               </Button>
             </div>
           </div>
+
+          {/* Last Import Result */}
+          {lastResult && (
+            <div className="mt-4 p-4 border rounded-lg bg-muted/50">
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                Import Summary
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Parsed:</span>
+                  <span className="ml-2 font-medium">{lastResult.summary.totalParsed}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Inserted:</span>
+                  <span className="ml-2 font-medium text-green-600">{lastResult.summary.inserted}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Updated:</span>
+                  <span className="ml-2 font-medium text-blue-600">{lastResult.summary.updated}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Errors:</span>
+                  <span className="ml-2 font-medium text-red-600">{lastResult.summary.errors}</span>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -282,7 +349,7 @@ export const ExcelImport = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => fetchBatchErrors(batch.id)}
+                      onClick={() => setShowErrors(true)}
                     >
                       View Error Details ({batch.failed_imports})
                     </Button>
@@ -295,7 +362,7 @@ export const ExcelImport = () => {
       </Card>
 
       {/* Error Details Modal */}
-      {showErrors && (
+      {showErrors && selectedBatchErrors.length > 0 && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -310,18 +377,10 @@ export const ExcelImport = () => {
               {selectedBatchErrors.map((error, index) => (
                 <div key={index} className="border rounded p-3 space-y-2">
                   <div className="flex justify-between items-start">
-                    <span className="text-sm font-medium">Row {error.row_number}</span>
+                    <span className="text-sm font-medium">Shop ID: {error.shopId}</span>
                     <Badge variant="destructive" className="text-xs">Error</Badge>
                   </div>
-                  <p className="text-sm text-red-600">{error.error_message}</p>
-                  <details className="text-xs">
-                    <summary className="cursor-pointer text-muted-foreground">
-                      View row data
-                    </summary>
-                    <pre className="mt-2 bg-muted p-2 rounded text-xs overflow-x-auto">
-                      {JSON.stringify(error.row_data, null, 2)}
-                    </pre>
-                  </details>
+                  <p className="text-sm text-red-600">{error.error}</p>
                 </div>
               ))}
             </div>
