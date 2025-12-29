@@ -32,6 +32,12 @@ function validateTwilioSignature(signature: string, url: string, params: Record<
   return signature === expected;
 }
 
+// Sanitize input for ILIKE pattern matching to prevent pattern injection
+function sanitizeILikePattern(input: string): string {
+  // Escape special ILIKE characters: %, _, \
+  return input.replace(/[%_\\]/g, '\\$&');
+}
+
 // Create deterministic user ID from phone number
 async function createDeterministicUserId(phoneNumber: string): Promise<string> {
   const encoder = new TextEncoder();
@@ -98,8 +104,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    const storeName = match[1].trim();
-    const city = match[2]?.trim();
+    // Sanitize user input to prevent ILIKE pattern injection
+    const storeName = sanitizeILikePattern(match[1].trim());
+    const city = match[2] ? sanitizeILikePattern(match[2].trim()) : null;
 
     console.log('Parsed - Store:', storeName, 'City:', city);
 
